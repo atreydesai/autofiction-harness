@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+.DS_Store
+drafter/output/
+editor/output_edit/
+!drafter/output/README.md
