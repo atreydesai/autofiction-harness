@@ -6,8 +6,8 @@ CLAUDE_DISALLOWED_TOOLS="${CLAUDE_DISALLOWED_TOOLS:-Agent,Task,TaskCreate,TaskGe
 CLAUDE_TOOLS="${CLAUDE_TOOLS:-Read,Bash,Grep,Glob}"
 
 "$CLAUDE_BIN" -p \
-  --model claude-opus-4-7 \
-  --effort max \
+  --model claude-fable-5 \
+  --effort xhigh \
   --tools "$CLAUDE_TOOLS" \
   --disallowedTools "$CLAUDE_DISALLOWED_TOOLS" \
   --output-format stream-json \

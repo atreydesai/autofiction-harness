@@ -120,8 +120,8 @@ if [ -n "$md_out" ]; then
 fi
 
 CLAUDE_BIN="${CLAUDE_BIN:-claude}"
-CLAUDE_MODEL="${CLAUDE_MODEL:-claude-opus-4-7}"
-CLAUDE_EFFORT="${CLAUDE_EFFORT:-max}"
+CLAUDE_MODEL="${CLAUDE_MODEL:-claude-fable-5}"
+CLAUDE_EFFORT="${CLAUDE_EFFORT:-xhigh}"
 CLAUDE_TOOLS="${CLAUDE_TOOLS:-Read,Bash,Grep,Glob}"
 CLAUDE_DISALLOWED_TOOLS="${CLAUDE_DISALLOWED_TOOLS:-Agent,Task,TaskCreate,TaskGet,TaskList,TaskStop,TaskUpdate,TaskOutput,ToolSearch}"
 

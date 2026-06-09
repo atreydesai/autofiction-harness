@@ -1,6 +1,6 @@
 # Autonomous Editor
 
-96-hour autonomous editing run over a drafted manuscript. Codex (GPT-5.5, extra-high reasoning) is the editor-orchestrator; Claude Opus 4.7 (max effort) is an independent revision agent and adversarial auditor. Every committed chapter goes through cross-model audit stacks.
+96-hour autonomous editing run over a drafted manuscript. Codex (GPT-5.5, extra-high reasoning) is the editor-orchestrator; Claude Fable 5 (xhigh effort) is an independent revision agent and adversarial auditor. Every committed chapter goes through cross-model audit stacks.
 
 ## Inputs
 
@@ -12,7 +12,7 @@
   - Optional: `reader_impressions.md` — author-direction reactions captured during drafting; treated as BINDING editorial direction
 - `input/draft/` — the drafted manuscript as per-chapter Markdown files (one per chapter). The editor archives these to `output_edit/original_draft_archive/` before any edits.
 - `input/artifacts/` — optional supporting artifacts from the drafting run (story_bible, continuity, skeleton, voice cards, tics, etc.). Treated as writer-intent evidence, not authority. **Note:** artifacts that prescribe specific chapter forms can bias the editor toward preserving those forms. Be selective about what you include.
-- `scripts/claude_logged_call.sh` — Claude wrapper (Opus 4.7 max, logging, serialization, markdown extraction).
+- `scripts/claude_logged_call.sh` — Claude wrapper (Fable 5 xhigh, logging, serialization, markdown extraction).
 - `scripts/inner_claude_smoke.sh` — Claude reachability check.
 - `launch.sh` — restartable 96-hour editor launcher.
 

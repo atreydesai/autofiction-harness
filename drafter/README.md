@@ -1,6 +1,6 @@
 # Autonomous novel generation template
 
-Premise-driven 96-hour autonomous novel-writing run. Codex (GPT-5.5, extra-high reasoning) is the author-editor, planner, continuity owner, and final integrator. Claude Opus 4.7 (max effort) is an independent co-drafter and adversarial editor. Every committed chapter goes through cross-model adversarial synthesis.
+Premise-driven 96-hour autonomous novel-writing run. Codex (GPT-5.5, extra-high reasoning) is the author-editor, planner, continuity owner, and final integrator. Claude Fable 5 (xhigh effort) is an independent co-drafter and adversarial editor. Every committed chapter goes through cross-model adversarial synthesis.
 
 ## Structure
 
@@ -35,4 +35,4 @@ The first launch writes `output/.deadline_epoch`; relaunches reuse that original
 
 ## Design
 
-The premise + reading guide carry all book-specific knowledge (voice, form, tics, motifs, care moves, length, architecture questions). The task prompt carries only premise-agnostic process: workspace layout, relaunch behavior, phase ordering, cross-model adversarial flow, brutal critique culture, per-chapter judgment, final-assembly conditions. The bet is that an Opus-4.7-and-GPT-5.5-class agent pair, given a rich premise and a comprehensive reading guide, will produce better work with less process scaffolding than with more. Calibration that matters lives in `premise/`; process that matters lives in `long_novel_task.md`; everything else is judgment.
+The premise + reading guide carry all book-specific knowledge (voice, form, tics, motifs, care moves, length, architecture questions). The task prompt carries only premise-agnostic process: workspace layout, relaunch behavior, phase ordering, cross-model adversarial flow, brutal critique culture, per-chapter judgment, final-assembly conditions. The bet is that an Fable-5-and-GPT-5.5-class agent pair, given a rich premise and a comprehensive reading guide, will produce better work with less process scaffolding than with more. Calibration that matters lives in `premise/`; process that matters lives in `long_novel_task.md`; everything else is judgment.

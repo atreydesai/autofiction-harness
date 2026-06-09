@@ -41,7 +41,7 @@ Optional artifacts under `output/` are allowed when useful. Do not create artifa
 
 Available under `scripts/`:
 
-- `claude_logged_call.sh` — wrapper for Claude Opus 4.7 max-effort calls. Logs every call to `output/logs/claude_calls.tsv`, captures stream output, extracts assistant text to a Markdown file when `--md-out` is supplied, and serializes Claude calls. No hard budget caps — iteration discipline lives in this task prompt. Use this rather than calling `claude -p` directly during the autonomous run.
+- `claude_logged_call.sh` — wrapper for Claude Fable 5 xhigh-effort calls. Logs every call to `output/logs/claude_calls.tsv`, captures stream output, extracts assistant text to a Markdown file when `--md-out` is supplied, and serializes Claude calls. No hard budget caps — iteration discipline lives in this task prompt. Use this rather than calling `claude -p` directly during the autonomous run.
 - `quality_gate.sh` — mechanical check for universal-bad patterns (TODO/PLACEHOLDER/AS AN AI/process-leakage markers and a few universally-workshop sentence patterns like em-dash apposition and not-X-but-Y scaffolds). Run before chapter commit. Premise-specific tics live in the reading guide and are checked by judgment, not by this script.
 - `dialogue_scene_manifest.sh` — inventories scenes with substantial quoted dialogue. Useful for scheduling Dialogue Doctor coverage on close-third human-POV chapters. Will produce thin results on chat-format-dominant books — that is correct behavior.
 - `prose_variability_audit.sh` — cross-chapter prose-rhythm metrics for final assembly.
@@ -161,7 +161,7 @@ If a chapter is weak, rewrite it through a fresh adversarial chapter cell from a
 
 ## Codex and Claude — role assignment
 
-Codex (you, running GPT-5.5 with extra-high reasoning) is the orchestrator. Claude Opus 4.7 (max effort) is the prose writer. Role assignment is fixed and load-bearing.
+Codex (you, running GPT-5.5 with extra-high reasoning) is the orchestrator. Claude Fable 5 (xhigh effort) is the prose writer. Role assignment is fixed and load-bearing.
 
 **Codex (orchestrator / editor-in-chief)**
 - Reads the premise and reading guide
@@ -221,13 +221,13 @@ After each chapter commit, record in `output/worklog.md`: which raw drafts exist
 
 **When Claude is unavailable.** A short outage (rate-limit window, transient failure) should be waited out: sleep until reset, then resume. A long outage (multi-hour, hard limit) should not halt the run — Codex may continue non-prose work (architecture revision, continuity tracking, critique preparation, status updates). **Codex should not draft prose chapters during long Claude outages.** Wait for Claude. If the deadline is approaching with chapters still unwritten, mark them provisional and call them out as exceptions in `output/final/final_report.md` — but do not let Codex backfill prose.
 
-**Claude command shape.** Use `scripts/claude_logged_call.sh`. The wrapper owns the strict Opus-max-effort command shape internally, logs every call (start/end times, prompt path, output path, exit code, duration), extracts assistant text to a Markdown artifact when `--md-out` is supplied, and serializes Claude calls. Save prompts under `output/model_prompts/claude/<kind>/<id>.md`. Stream outputs go under `output/drafts/claude/` (for draft prose) or `output/critiques/claude/<kind>/` (for critiques and audits). For any call whose result you'll reuse, supply `--md-out` so the wrapper extracts the readable Markdown. **This drafting run does NOT enforce hard Claude call budgets; iteration discipline lives in this prompt, not in the wrapper.** Direct `claude -p` invocation outside the wrapper is forbidden — provenance must be mechanical.
+**Claude command shape.** Use `scripts/claude_logged_call.sh`. The wrapper owns the strict Fable-5-xhigh-effort command shape internally, logs every call (start/end times, prompt path, output path, exit code, duration), extracts assistant text to a Markdown artifact when `--md-out` is supplied, and serializes Claude calls. Save prompts under `output/model_prompts/claude/<kind>/<id>.md`. Stream outputs go under `output/drafts/claude/` (for draft prose) or `output/critiques/claude/<kind>/` (for critiques and audits). For any call whose result you'll reuse, supply `--md-out` so the wrapper extracts the readable Markdown. **This drafting run does NOT enforce hard Claude call budgets; iteration discipline lives in this prompt, not in the wrapper.** Direct `claude -p` invocation outside the wrapper is forbidden — provenance must be mechanical.
 
 Productive Claude use includes: drafting chapters, drafting replacement scenes, drafting line-level repairs, producing voice cards' synthetic-exchange audits, performing cold reads, anti-default critiques, register-drift audits, Comedy/Dialogue/Clarity/Figuration Doctor passes, full-book cold read at final assembly. Use Claude heavily; do not self-throttle.
 
 Unproductive Claude use includes: running the same audit repeatedly without acting on findings, asking for another diagnosis to avoid making a structural decision, verifying unchanged text, seeking consensus after a clear failure has already been found.
 
-**Claude call patience.** Opus 4.7 max-effort calls regularly take 12-18 minutes wall clock with extended silent thinking phases that produce no streaming tokens. Do not kill a call as "hung" unless the stream file's modification time has not advanced for at least 5 minutes AND total wall clock exceeds 25 minutes since `START`. Both conditions must hold. **Chapter-draft calls can run substantially longer** (30-60 minutes is normal for a 2-3K word chapter draft with Opus thinking through voice-card constraints); for those, allow up to 60 minutes total wall clock plus 10 minutes of stream-file staleness before kill consideration. Killing a Claude call that would otherwise have completed is more expensive than waiting another 10-30 minutes — the next chapter's drafts and audits all back up behind it. The wrapper itself has no internal timeout, by design — kill decisions are yours, made conservatively.
+**Claude call patience.** Fable 5 xhigh-effort calls regularly take 12-18 minutes wall clock with extended silent thinking phases that produce no streaming tokens. Do not kill a call as "hung" unless the stream file's modification time has not advanced for at least 5 minutes AND total wall clock exceeds 25 minutes since `START`. Both conditions must hold. **Chapter-draft calls can run substantially longer** (30-60 minutes is normal for a 2-3K word chapter draft with Fable 5 thinking through voice-card constraints); for those, allow up to 60 minutes total wall clock plus 10 minutes of stream-file staleness before kill consideration. Killing a Claude call that would otherwise have completed is more expensive than waiting another 10-30 minutes — the next chapter's drafts and audits all back up behind it. The wrapper itself has no internal timeout, by design — kill decisions are yours, made conservatively.
 
 ## Brutal critique culture
 
@@ -301,7 +301,7 @@ Do not create or treat `output/final/novel.md` as a completed final candidate un
 - continuity and reveal/payoff state are coherent
 - `bash scripts/quality_gate.sh` passes with zero open hits
 - if the reading guide declares specific adversarial passes mandatory for this book, coverage exists for every chapter that should have received them
-- **a Claude Opus 4.7 full-book cold read has been run on the assembly candidate and its findings have been resolved, deferred with recorded reasons, or explicitly rejected with reasons in `output/critiques/claude/final_cold_read.md`.** This is not optional. Disagreements with Codex's assessment are valuable and should not be reconciled by fiat.
+- **a Claude Fable 5 full-book cold read has been run on the assembly candidate and its findings have been resolved, deferred with recorded reasons, or explicitly rejected with reasons in `output/critiques/claude/final_cold_read.md`.** This is not optional. Disagreements with Codex's assessment are valuable and should not be reconciled by fiat.
 
 Before this point, assembled manuscripts should be called drafts or checkpoints.
 

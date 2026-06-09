@@ -73,7 +73,7 @@ Do not edit `input/` files. They are inputs only.
 ## Scripts
 
 Available under `scripts/`:
-- `claude_logged_call.sh` — wrapper for Claude Opus 4.7 max-effort calls. Logs every call, captures stream output, extracts assistant text to a Markdown file when `--md-out` is supplied, and serializes Claude calls. No hard budget caps — iteration discipline lives in this task prompt. Use this rather than calling `claude -p` directly.
+- `claude_logged_call.sh` — wrapper for Claude Fable 5 xhigh-effort calls. Logs every call, captures stream output, extracts assistant text to a Markdown file when `--md-out` is supplied, and serializes Claude calls. No hard budget caps — iteration discipline lives in this task prompt. Use this rather than calling `claude -p` directly.
 - `inner_claude_smoke.sh` — Claude reachability smoke test used by the launcher.
 
 ## Relaunch behavior
@@ -303,7 +303,7 @@ See "Final assembly" section below.
 
 ## Codex and Claude — role assignment
 
-Codex (you, running GPT-5.5 with extra-high reasoning) is the orchestrator. Claude Opus 4.7 (max effort) is the prose writer.
+Codex (you, running GPT-5.5 with extra-high reasoning) is the orchestrator. Claude Fable 5 (xhigh effort) is the prose writer.
 
 **Codex (orchestrator / editor-in-chief)**
 - Reads the binding standard
@@ -351,9 +351,9 @@ These tics must be audited on every Claude revision. The calibration artifact ma
 
 **During Claude outages, Codex MAY run** any non-prose work: cold reads (Codex lens), surgery planning, calibration consolidation, tracker work, voice-card synthesis/amplification, periodic register-drift audits, the Codex-on-Claude side of Adversarial Register Audit (incl. comp-author drift), and all Codex-runnable audits (Motif, Chat, Form-Distribution, Pacing, Character-Intro, Opening Hook, Surprise, Set-Piece, Counter-Strip, Ending-Earn, Book-Level Comedy/Derangement Arc, Voice Card Re-amplification). **Codex MUST NOT** backfill prose revisions or run Claude-required audits (Plain-Translation, Chaos-Up, Claude-on-Codex Adversarial Register). Provisional chapters lacking Claude pressure must be called out in `final_report.md`.
 
-**Claude command shape.** Use `scripts/claude_logged_call.sh`. The wrapper enforces the Opus-max-effort command shape internally, logs every call, captures stream output, extracts assistant text to a Markdown file when `--md-out` is supplied, and serializes Claude calls. Save prompts under `output_edit/model_prompts/claude/<kind>/<id>.md`. Stream outputs go under `output_edit/audits/claude/` or `output_edit/drafts/claude/` as appropriate. No internal timeout — kill decisions are yours, made conservatively. Direct `claude -p` invocation outside the wrapper is forbidden — provenance must be mechanical.
+**Claude command shape.** Use `scripts/claude_logged_call.sh`. The wrapper enforces the Fable-5-xhigh-effort command shape internally, logs every call, captures stream output, extracts assistant text to a Markdown file when `--md-out` is supplied, and serializes Claude calls. Save prompts under `output_edit/model_prompts/claude/<kind>/<id>.md`. Stream outputs go under `output_edit/audits/claude/` or `output_edit/drafts/claude/` as appropriate. No internal timeout — kill decisions are yours, made conservatively. Direct `claude -p` invocation outside the wrapper is forbidden — provenance must be mechanical.
 
-**Claude call patience.** Opus 4.7 max-effort calls regularly take 12-18 minutes wall clock with extended silent thinking phases that produce no streaming tokens. **Chapter-revision calls can run 30-60 minutes for a substantial rewrite.** Do not kill a call as "hung" unless the stream file's modification time has not advanced for at least 5 minutes AND total wall clock exceeds 25 minutes (general calls) or 60 minutes (chapter-revision calls). Both conditions must hold. Killing a call that would have completed is more expensive than waiting another 10-30 minutes.
+**Claude call patience.** Fable 5 xhigh-effort calls regularly take 12-18 minutes wall clock with extended silent thinking phases that produce no streaming tokens. **Chapter-revision calls can run 30-60 minutes for a substantial rewrite.** Do not kill a call as "hung" unless the stream file's modification time has not advanced for at least 5 minutes AND total wall clock exceeds 25 minutes (general calls) or 60 minutes (chapter-revision calls). Both conditions must hold. Killing a call that would have completed is more expensive than waiting another 10-30 minutes.
 
 ## Chapter intervention classifications
 
@@ -655,7 +655,7 @@ Do not create `output_edit/final/novel.md` as a final candidate until ALL of the
 - Inviolable elements present in committed form (spot-check against calibration's inviolable-element list).
 - Cross-model adversarial pressure engaged both Codex and Claude on every TARGETED/HEAVY/REWRITE chapter — Adversarial Register Audit (incl. comp-author drift check AND AI-Dystopia Genre-Cliché Check) findings resolved. Provisional single-model chapters explicitly flagged in `final_report.md`.
 - Ending-Earn Audit at Phase 6 returns EARNS with locked final lines confirmed LANDING.
-- **A Claude Opus 4.7 full-book cold read** has run on the assembly candidate at `output_edit/critiques/claude/final_cold_read.md`; findings resolved, deferred with reasons, or explicitly rejected. **NOT optional.** Disagreements with Codex's assessment are valuable; do not reconcile by fiat.
+- **A Claude Fable 5 full-book cold read** has run on the assembly candidate at `output_edit/critiques/claude/final_cold_read.md`; findings resolved, deferred with reasons, or explicitly rejected. **NOT optional.** Disagreements with Codex's assessment are valuable; do not reconcile by fiat.
 
 Before this point, assemblies are drafts or checkpoints. If relaunched after a complete-looking but not-yet-cold-read draft, treat as Draft N — do not default to polish; ask what residual drift the next cold read could surface.
 

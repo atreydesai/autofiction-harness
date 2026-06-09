@@ -1,6 +1,6 @@
 # Verve Pipeline — Drafter + Editor
 
-Two-stage autonomous novel pipeline. Both stages use Codex (GPT-5.5 extra-high) as the orchestrator and Claude Opus 4.7 (max effort) as the independent revision agent / adversarial auditor.
+Two-stage autonomous novel pipeline. Both stages use Codex (GPT-5.5 extra-high) as the orchestrator and Claude Fable 5 (xhigh effort) as the independent revision agent / adversarial auditor.
 
 ## Contents
 
