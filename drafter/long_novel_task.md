@@ -28,8 +28,21 @@ Work only under `output/`. All durable artifacts live there. Required state acro
 - `output/drafts/codex/` and `output/drafts/claude/` — raw model-originated drafts (preserved for provenance)
 - `output/critiques/codex/` and `output/critiques/claude/` — critiques organized by target
 - `output/revision_plan.md` — current developmental diagnosis and next high-leverage revisions
-- `output/tics.md` — running book-wide prose-tic tally
+- `output/tics.md` — running book-wide prose-tic tally (seeded each commit from the quality gate's WATCH counts)
+- `output/master_spec.md` — the project's master spec (instantiate from `../checks/scaffolds/master_spec.md` in Phase 1)
+- `output/world_bible.md` — world rules, institutions, constraints (instantiate from `../checks/scaffolds/world_bible.md`)
+- `output/npc_goals.md` — per-secondary-character offscreen goals (`../checks/scaffolds/npc_goals.md`)
+- `output/timeline.md` — visible-time tracker incl. simultaneity-critical sequences (`../checks/scaffolds/timeline.md`)
+- `output/event_ripple_tracker.md` — major events and their propagating consequences (`../checks/scaffolds/event_ripple_tracker.md`)
+- `output/thread_ledger.md` — seeds planted, payoff obligations, PROTECTED unresolved threads (`../checks/scaffolds/thread_ledger.md`)
+- `output/rolling_summaries/chapter_XX.md` — per-chapter rolling summaries for context packets (`../checks/scaffolds/rolling_summary.md`)
+- `output/canon_sheet.md` — one-page facts the novel must stay consistent about, with `[verify ...]` placeholders (`../checks/scaffolds/canon_sheet.md`)
+- `output/research_dossier.md` — research items: source, reliability, story question, constraint, scenes affected (`../checks/scaffolds/research_dossier.md`)
+- `output/style_sheet.md` — spelling/hyphenation/capitalization/invented-term conventions, maintained from line-edit stage on (`../checks/scaffolds/style_sheet.md`)
+- `output/prompt_library.md` — reusable prompt templates for chapter packets and audits (`../checks/scaffolds/prompt_library.md`)
 - `output/final/novel.md` + `output/final/final_report.md` — only when final assembly is genuinely justified
+
+`output/continuity.md` follows the continuity-log content categories in `../checks/scaffolds/continuity_log.md`. These scaffolds are required state, not compliance theater: the world/continuity audits (`../checks/audits/`) read them, and a stale tracker is itself a blocking finding at final assembly.
 
 Use git inside `output/` as rollback safety net. Initialize `output/.git` before major work. Commit after every architecture decision, chapter draft, major critique, and developmental revision.
 
@@ -42,10 +55,22 @@ Optional artifacts under `output/` are allowed when useful. Do not create artifa
 Available under `scripts/`:
 
 - `claude_logged_call.sh` — wrapper for Claude Fable 5 xhigh-effort calls. Logs every call to `output/logs/claude_calls.tsv`, captures stream output, extracts assistant text to a Markdown file when `--md-out` is supplied, and serializes Claude calls. No hard budget caps — iteration discipline lives in this task prompt. Use this rather than calling `claude -p` directly during the autonomous run.
-- `quality_gate.sh` — mechanical check for universal-bad patterns (TODO/PLACEHOLDER/AS AN AI/process-leakage markers and a few universally-workshop sentence patterns like em-dash apposition and not-X-but-Y scaffolds). Run before chapter commit. Premise-specific tics live in the reading guide and are checked by judgment, not by this script.
-- `dialogue_scene_manifest.sh` — inventories scenes with substantial quoted dialogue. Useful for scheduling Dialogue Doctor coverage on close-third human-POV chapters. Will produce thin results on chat-format-dominant books — that is correct behavior.
-- `prose_variability_audit.sh` — cross-chapter prose-rhythm metrics for final assembly.
+- `quality_gate.sh` — wrapper for the shared tiered mechanical gate at `../checks/quality_gate.py`. It scans committed chapters against the full pattern registry under `../checks/patterns/*.tsv` (200+ patterns from the unified check sources: banned constructions, phrase banks, AI-vocabulary clusters, rhythm/density caps, formatting artifacts, Wikipedia signs-of-AI-writing). Three tiers: **BANNED** (any hit blocks commit), **CAP** (blocks above the pattern's stated threshold per scene/chapter/1k-words), **WATCH** (counted and reported, never blocks — feeds the judgment audits and `output/tics.md`). Run before every chapter commit; run with `--book-level` at full-book milestones for the cross-chapter accumulation report. Premise-specific tics from the reading guide are checked by judgment and by reading-guide-derived allowlist/registry extensions, not hardcoded here.
+- `dialogue_scene_manifest.sh` — inventories scenes with substantial quoted dialogue. Used to trigger the `dialogue_doctor` audit. Will produce thin results on chat-format-dominant books — that is correct behavior.
+- `prose_variability_audit.sh` — cross-chapter prose-rhythm metrics; mechanical input to the `regularity_master_test` and `tempo_variation` audits and final assembly.
 - `inner_claude_smoke.sh` — Claude reachability smoke test used by the launcher.
+
+## Check library
+
+The shared check library at `../checks/` is binding process equipment for this run:
+
+- `../checks/patterns/*.tsv` + `../checks/quality_gate.py` — the mechanical gate (above).
+- `../checks/audit_manifest.tsv` — the **audit schedule**: every judgment audit's id, owner (`claude` = run through `scripts/claude_logged_call.sh` with the audit file's Prompt template; `codex` = you perform the audit file's Procedure inline and write the output file yourself), tier (`core` = every chapter before commit; `risk` = runs when its trigger fires; `book` = whole-manuscript phases), trigger, and output path (`{audit_root}` = `output/critiques` for this stage).
+- `../checks/audits/<id>.md` — one template per audit. Use them verbatim: the Critique stance header, the criteria, and the Required verdict format are all binding. An audit output without per-criterion verdicts and quoted evidence is an incomplete audit.
+- `../checks/protocols/` — drafting/revision protocols wired into the phases below: `pre_draft.md`, `mid_draft_flagging.md`, `post_draft_revision.md`, `required_checks.md`, `diagnostic_questions.md`, `revision_discipline.md`, `editing_stages.md`, `core_workflow.md`, `final_test.md`, `precedence.md` (the precedence hierarchy + safety rails: never "fix" prose by inventing typos, breaking grammar, faking messiness; em dashes/semicolons/"however" are CAP/WATCH matters, not bans).
+- `../checks/scaffolds/` — templates for the workspace artifacts listed above.
+
+**Risk triggers** come from three sources: (1) the chapter card's audit-trigger flags (see Phase 5), (2) the quality gate's WATCH counts (a `watch:<group>` trigger fires when the chapter's WATCH counts for that pattern group are non-trivial — your judgment, but high-density chapters per the book-level accumulation report MUST get their triggered audits), (3) cadences and events (`cadence:every-N-chapters`, `event:major-revision`, etc.). **Coverage rule:** by final assembly, every chapter must have received every audit applicable to it at least once (core always; risk audits wherever their trigger condition was ever true; book audits on the whole manuscript). Track coverage mechanically from audit output filenames.
 
 ## Relaunch behavior
 
@@ -83,11 +108,11 @@ The prior failure mode was committing to a structure too early and trying to res
 
 Phase order is logical, not strict. Adapt as the premise requires. Target chapter-1 drafting by hour 8-10 of a cold start; hard cap architecture at hour 12. If no viable architecture exists by hour 12, choose the least-bad high-ceiling option, bank unresolved architecture risks in `output/revision_plan.md`, and begin provisional drafting.
 
-**Phase 1 — Premise interpretation.** Read `premise/` (premise file + any reading guide). Write initial `output/story_bible.md` covering: premise contract, characters, world rules, voice register, form binding, length target, motifs, care moves, tic catalog, plot architecture, ending direction, key uncertainties. If no reading guide present, also produce `output/reading_guide_derived.md`. Lock in the binding choices the premise has already made; identify what remains open for architecture.
+**Phase 1 — Premise interpretation.** Read `premise/` (premise file + any reading guide). Run the premise-development protocol in `../checks/scaffolds/premise_development.md`: idea-survival test, idea→premise distillation, **promise testing (all five questions, answered in writing)**, and expansion into a story paragraph with its checklist. Save the results in `output/master_spec.md` (instantiated from the master-spec scaffold). Write initial `output/story_bible.md` covering: premise contract, characters, world rules, voice register, form binding, length target, motifs, care moves, tic catalog, plot architecture, ending direction, key uncertainties. Initialize `output/world_bible.md`, `output/canon_sheet.md`, and `output/research_dossier.md` from their scaffolds (use `[verify ...]` placeholders rather than stalling on research; never let a `[verify]` survive into a committed chapter). If no reading guide present, also produce `output/reading_guide_derived.md`. Lock in the binding choices the premise has already made; identify what remains open for architecture.
 
 **Phase 2 — Architecture.** Choose the architecture work the premise requires:
 
-- **(a) Book-shape brainstorm** if the premise has architectural latitude. Produce at least three substantially-different candidate book shapes — different dramatic engines, primary-relationship arcs, opposition shapes, ending shapes, structural forms. Use Claude under a true-independence protocol (minimal prompt, premise only, no axes list, no style scaffold, no obvious-versions list). Run an adversarial Anti-Default Audit against the candidates. Choose with concrete reasons; record rejected shapes.
+- **(a) Book-shape brainstorm** if the premise has architectural latitude. Produce at least three substantially-different candidate book shapes — different dramatic engines, primary-relationship arcs, opposition shapes, ending shapes, structural forms. Use Claude under a true-independence protocol (minimal prompt, premise only, no axes list, no style scaffold, no obvious-versions list). Run the Anti-Default Audit (`../checks/audits/anti_default_audit.md`, Mode A) against the candidates. Choose with concrete reasons; record rejected shapes.
 - **(b) Chapter-map design** if the premise is shape-committed (form, voice, central beats already chosen). Produce at least three alternative chapter mappings — different sequencings, POV proportions, reveal timings, opening choices, aftermath shapes. Anti-default audit. Choose one.
 - **(c) Mixed** if some structural elements are committed and others are open.
 
@@ -115,9 +140,15 @@ VOICE CARD — <character name>
 - never says: <words, registers, constructions out of character>
 - relationship-specific: <how speech shifts per major interlocutor>
 - premise-specific behavior: <register shifts, care moves, motifs this character owns>
+- dialogue samples: <3-5 verbatim example lines in this character's voice — the model mimics rhythm, word choice, attitude from samples far better than from descriptions>
+- speech quirks: <2 distinctive speech patterns that anchor the voice>
+- words they use / never use: <owned vocabulary vs banned-for-this-character vocabulary — when every character shares vocabulary, they blur together>
+- stress response: <what they do under stress/conflict — one gets quiet, one loud, one jokes, one blames; two characters must not share a response>
+- what they get wrong: <misunderstandings, blind spots, unjustified defensiveness — the model defaults to competence; this field is the antidote>
+- operation snapshot: <how this character thinks / talks / moves through the world — operation, not trait list>
 ```
 
-If a character has unusual structure (e.g., a narrator with multiple registers, an AI with audience-flat register, a non-speaking but documented presence, a polyphonic-narrator with mode-specific behavior), extend the template as needed. Document the extension in `output/style_and_voice.md` so the drafter can copy-paste reliably under context pressure.
+The full merged template with provenance notes is `../checks/scaffolds/character_snapshot.md`; instantiate from it. If a character has unusual structure (e.g., a narrator with multiple registers, an AI with audience-flat register, a non-speaking but documented presence, a polyphonic-narrator with mode-specific behavior), extend the template as needed. Document the extension in `output/style_and_voice.md` so the drafter can copy-paste reliably under context pressure.
 
 Do not build voice cards as walls of negative constraints. The card's job is to make a character easy to write in positive motion. If a character needs many warnings, move them to the chapter-card risks or `output/tics.md`.
 
@@ -140,10 +171,14 @@ Useful lenses: ruthless developmental editor, impatient genre superfan, major-pr
 - reader-load risk (where this chapter could become dense or effortful)
 - dialogue risks and what dialogue should accomplish
 - prose stance and anti-tics for the chapter
-- motif instances this chapter carries (if the reading guide tracks motifs — e.g., Tuesday-mention)
+- motif instances this chapter carries (if the reading guide tracks motifs)
 - drafting/synthesis lane: `dual-draft` / `single-seed + opposing critique` / `scene-level competing drafts`
+- scene designations: each scene marked proactive (Goal–Conflict–Setback) or reactive (Reaction–Dilemma–Decision)
+- **prose dials** for this chapter (the chapter packet copies these into the drafting prompt): style anchor (named author/work or described vibe — with the anti-fixation rule: anchors transfer texture, never content, names, or plot), prose density (sparse ↔ layered), vocabulary range (and descriptors not to repeat), pacing profile (per scene type), show/tell dial setting, POV tightness, genre flavor and tropes in play
+- **outcome rules** for this chapter: which thread-ledger threads are PROTECTED from resolution here; which seeds to plant; the yes-but/no-and shape of each significant character attempt; named tension type; failure states armed; antagonist pressure due
+- **audit-trigger flags** (route the risk-tier audits; use the flag vocabulary from `../checks/scaffolds/chapter_outline_card.md`): dialogue-scenes, violence, dark-content, comic-register, figuration-heavy, multi-character-scene, mentor-scene, high-leverage-scene, dense-or-system-heavy, emotional-peak, reflective-chapter, worldbuilding-heavy, protagonist-heavy, plan-succeeds-easily, card-names-tension, new-or-returning-character, recurring-conversation
 
-The goal is not to ban complexity, jargon, lyricism, or mystery. The goal is to make the agent decide what kind of difficulty the reader is meant to enjoy here and which competing difficulties should be delayed, translated through action, or recast as atmosphere.
+The full merged card template is `../checks/scaffolds/chapter_outline_card.md`. The goal is not to ban complexity, jargon, lyricism, or mystery. The goal is to make the agent decide what kind of difficulty the reader is meant to enjoy here and which competing difficulties should be delayed, translated through action, or recast as atmosphere.
 
 **Phase 6 — Adversarial critique of chapter cards.** Same multi-round pattern as Phase 4. Same hard cap of 4 rounds. Watch especially for: chapters whose function is "advance plot" rather than unique dramatic work; act sag (consecutive cards in the middle doing similar work); reveal timing that wastes pressure; missing aftermath cards after major turns; cards whose scene engine is thin.
 
@@ -151,7 +186,7 @@ The goal is not to ban complexity, jargon, lyricism, or mystery. The goal is to 
 
 After each act or major arc, run brutal cross-model critique and update chapter cards before continuing.
 
-**Phase 8 — Full-book critique + revision.** Treat Draft 0 as a prototype. Run full-book cold reads from both models. Restructure, cut, replace, expand. Rewrite weak chapters from blank pages using revised cards; do not polish weak chapters into strength.
+**Phase 8 — Full-book critique + revision.** Treat Draft 0 as a prototype. Run full-book cold reads from both models (`cold_read_full_book`, including the reader-engagement question battery) plus the book-tier audits from the manifest: `reverse_outline` (causal spine — every chapter linked by therefore/but, AND-THEN links flagged), `macro_revision_diagnostics`, `self_revision_checklists`, `book_arc`, `motif_audit`, `form_distribution`, `chat_audit_book`, `world_coherence`, `anti_default_audit` (Mode B, derivative drift), `llm_judge_rubric`, `seed_payoff` (full-ledger sweep), and `quality_gate.sh --book-level`. Restructure, cut, replace, expand. Rewrite weak chapters from blank pages using revised cards; do not polish weak chapters into strength. Follow the macro-before-line ordering in `../checks/protocols/editing_stages.md`: structural findings freeze line-editing until resolved. After any structural change, run `ripple_audit_post_revision` on every chapter that references the changed material. Late passes maintain `output/style_sheet.md` and run `../checks/protocols/required_checks.md` on revised text.
 
 Repeat developmental critique and revision until both models produce rounds with no high-leverage findings on the manuscript itself.
 
@@ -207,13 +242,15 @@ Codex must run a Claude-tic audit against every Claude draft before synthesis or
 
 **Default chapter cell while both models are available:**
 
-1. Codex prepares the chapter card and context packet: premise/reading-guide excerpts, story_bible/continuity excerpts, voice cards for speakers, scene engine, what must accomplish, specific risks to avoid.
-2. Claude drafts the chapter from the packet using `scripts/claude_logged_call.sh`. Save the raw draft at `output/drafts/claude/chapter_XX.round_NN.md` via the wrapper's `--md-out`.
+1. Codex prepares the chapter card and context packet: premise/reading-guide excerpts, story_bible/continuity/canon-sheet excerpts, rolling summaries of the adjacent chapters, voice cards for speakers (full cards, verbatim, including dialogue samples and word-ownership lists), scene engine, what must accomplish, specific risks to avoid, the card's prose dials and outcome rules, the relevant thread-ledger entries (protected threads, seeds due), and the answered pre-draft checklist (`../checks/protocols/pre_draft.md` — Codex answers it on the card; unanswerable items mean the card is not ready). Where the card's style anchor calls for demonstration, include a short exemplar passage — demonstration beats specification — under the anti-fixation rule: the exemplar transfers rhythm and texture only; copying its content, names, images, or sentences is a defect. Reusable packet shells live in `output/prompt_library.md`.
+2. Claude drafts the chapter from the packet using `scripts/claude_logged_call.sh`. The drafting prompt embeds the mid-draft flagging protocol (`../checks/protocols/mid_draft_flagging.md`) so the drafter self-redirects when it catches itself producing a banned element. Save the raw draft at `output/drafts/claude/chapter_XX.round_NN.md` via the wrapper's `--md-out`.
 3. Optionally: Codex produces a parallel draft for synthesis at `output/drafts/codex/chapter_XX.md`. This is not required for most chapters — Claude draft + Codex critique is sufficient. Use a parallel Codex draft when the chapter is high-leverage (Best-Scene-equivalent moments, the climax, the ending) or when Claude's first draft has structural issues a counter-draft would test.
-4. Codex critiques Claude's draft, including the Claude-tic audit. If Codex produced a parallel draft, Claude critiques it (also through `scripts/claude_logged_call.sh`).
-5. Codex writes synthesis memo at `output/critiques/codex/synthesis/chapter_XX.md`: accepted findings, rejected findings with reasons, what was kept from Claude's draft, what was modified, what (if anything) came from Codex's parallel draft.
-6. Codex integrates the accepted chapter at `output/chapters/chapter_XX.md`. **Do not average drafts. Synthesize line by line.** When both drafts exist, preserve the strongest scene pressure, voice, specificity, and reader momentum — Claude's prose is the default base; Codex's parallel draft contributes specific paragraphs, dialogue turns, or transitions where it's genuinely stronger.
-7. Run per-chapter quality gate (see Quality).
+4. Codex critiques Claude's draft, including the Claude-tic audit (`../checks/audits/claude_tic_audit.md`). If Codex produced a parallel draft, Claude critiques it and runs the Codex-tic audit on it (`../checks/audits/codex_tic_audit.md`, through `scripts/claude_logged_call.sh`).
+5. Codex runs the post-draft revision protocol (`../checks/protocols/post_draft_revision.md`) against the draft: the mechanical search half is automated by the quality gate; the protocol governs the fixes.
+6. Codex writes synthesis memo at `output/critiques/codex/synthesis/chapter_XX.md`: accepted findings, rejected findings with reasons, what was kept from Claude's draft, what was modified, what (if anything) came from Codex's parallel draft.
+7. Codex integrates the accepted chapter at `output/chapters/chapter_XX.md`. **Do not average drafts. Synthesize line by line.** When both drafts exist, preserve the strongest scene pressure, voice, specificity, and reader momentum — Claude's prose is the default base; Codex's parallel draft contributes specific paragraphs, dialogue turns, or transitions where it's genuinely stronger.
+8. Run the per-chapter gate stack (see Per-chapter quality): mechanical quality gate, then the core audits from `../checks/audit_manifest.tsv`, then any risk audits whose triggers fired for this chapter. Findings repair before commit.
+9. Update the living trackers (every commit, no exceptions): `output/continuity.md` (immediate reconciliation — contradictions trigger revision of the chapter or the tracker NOW, not at assembly), `output/thread_ledger.md` (seeds planted / payoffs fired / threads touched), `output/timeline.md`, `output/event_ripple_tracker.md` (if a major event occurred), `output/npc_goals.md` (advance offscreen goals), `output/rolling_summaries/chapter_XX.md`, and `output/tics.md` (append the gate's WATCH counts).
 
 What is not acceptable: Codex writing a chapter alone (skipping Claude's draft); "consensus" that averages away the best edges of both drafts; running Claude as token rubber-stamp critique only. The chapter prose must come from Claude unless Claude is unavailable.
 
@@ -256,17 +293,15 @@ Before committing any chapter, run a judgment check covering:
 - Are new terms / names / institutions / rules made plain enough before they carry plot weight?
 - If the chapter is intentionally dense, oblique, lyric, comic, fractured, or withholding, is the opacity explicitly assigned to atmosphere / suspense / voice / later payoff rather than accidentally hiding scene logistics?
 
-**Available adversarial passes** — run on judgment when chapter risks warrant. The reading guide may specify particular passes that must run on every chapter:
+**The audit schedule.** Judgment audits are defined one-per-item under `../checks/audits/` and scheduled by `../checks/audit_manifest.tsv`. Per chapter, before commit:
 
-- **Dialogue Doctor** — fresh Claude session reads cold, finds LLM-default dialogue failures (voice convergence, monotone Q/A rhythm, missing interiority, questions-as-statements, fake-McCarthy minimalism, jargon-trading without translation, attribution opacity). Calibrate the prompt against the reading guide's voice rules; for chat-format material specifically, the reading guide will tell you which generic failure modes do NOT apply. Findings are blocking; resolve via opposing-model rewrite, not self-repair. Save under `output/critiques/claude/dialogue_doctor/chapter_XX_scene_YY.md`.
-- **Positive Prose Audit** — fresh Claude pass for the failure mode greps miss: smooth, grammatical, generic prose that still feels LLM-clean. Asks: which paragraphs feel portable to another novel? Where does prose summarize pressure rather than make the reader inhabit it? Where does dialogue sound polished, therapeutic, aphoristic? Where would literal precision beat figurative language? Save under `output/critiques/claude/prose_audit/chapter_XX.md`.
-- **Comedy Doctor** — if the reading guide commits the book to a comic register, run on every chapter to test whether comedy is landing in this book's specific register (not against generic literary-judge taste). Inventory comic items, name comic mechanism, source (character / situation / narrator-overlay), funniness 0-2, portability, dramatic work. Verdicts: `CLEAR` / `CLEAR BUT THIN` / `DRY` / `OVERSWEETENED` / `CRINGE` / `MONOTONOUS`. Save under `output/critiques/claude/comedy/chapter_XX.md`.
-- **Fresh-Reader Clarity Pass** — for chapters that are conceptually dense, system-heavy, lyric, strange, or formally unusual. Plain-Event Summary, Term/Name/Institution Inventory, Confusion Map, Revision Orders. Save under `output/critiques/claude/clarity/chapter_XX.md`.
-- **Figurative Language Audit** — for chapters where heightened imagery does work. Test every metaphor against literal-anchor, focalizer-fit, scene-specificity, replacement test, and human-reader-cringe test. Save under `output/critiques/claude/figuration/chapter_XX.md`.
+- **Core audits run on every chapter** (owner per the manifest; Codex-owned procedures are performed inline and still produce their own output file; Claude-owned templates go through `scripts/claude_logged_call.sh`): `claude_tic_audit`, `consequence_test`, `opening_hook`, `ending_quality`, `surprise_audit`, `unresolved_threads`, `continuity_check_immediate`, `voice_cover_names`, `editor_scored_check`, `shared_vocab_conformance`, plus `dialogue_doctor` on every chapter the dialogue-scene manifest flags, and `convenient_invention` on every chapter that was revised rather than freshly drafted.
+- **Risk audits run when their trigger fires** — chapter-card flags, WATCH-count groups, cadences, events, calibration gates — per the manifest. Examples: `sanitization_audit` on dark-content chapters, `clean_fight_test` on violence, `comedy_doctor` on every chapter if the reading guide commits a comic register, `clarity_pass` on dense/system-heavy chapters, `figuration_audit` on figuration-heavy chapters, `mentor_scene_check` when a mentor scene exists, `voice_check_protocol` every 5 chapters, `zoom_out_audit` every 4, `npc_offscreen_goals` and `meanwhile_audit` every 3, `seed_payoff` every 5, per-act audits (`tempo_variation`, `antagonist_pressure`, `arc_position`, `time_visibility`) at act boundaries, `ripple_effects` after major plot events, `ripple_audit_post_revision` after structural revisions, `chaos_up`/`register_density` only if the reading guide/calibration declares amplification direction or density baselines.
+- **Book audits** (`cold_read_full_book`, `reverse_outline`, `macro_revision_diagnostics`, `self_revision_checklists`, `llm_judge_rubric`, `book_arc`, `motif_audit`, `form_distribution`, `chat_audit_book`, `ending_earn`, `world_coherence`, `anti_default_audit` Mode B, `final_test`) run in Phase 8 and at final assembly.
 
-These are tools, not gates. Run them when judgment says the chapter's risks warrant them. The reading guide may declare specific passes mandatory for this book.
+Audit outputs follow the manifest's output pattern with `{audit_root}` = `output/critiques`. Every audit uses its template's Critique stance and Required verdict format; a bare pass without per-criterion evidence is an incomplete audit and the chapter does not commit on it. Findings are blocking: resolve via opposing-model rewrite (not self-repair for Claude-found dialogue/prose failures), or record a reasoned rejection in the synthesis memo. The coverage rule from "Check library" applies: by final assembly every chapter has every applicable audit at least once.
 
-**Mechanical check.** Before commit, run `bash scripts/quality_gate.sh` and resolve any open hits. The script catches universally-bad patterns (TODO/PLACEHOLDER/AS AN AI/process-leakage; em-dash apposition for emotional emphasis; not-X-but-Y workshop scaffolds; silence-pause cliches; narrator-admiration tells; uncontracted casual dialogue). Premise-specific tics live in the reading guide and are checked by judgment, not by this script.
+**Mechanical check.** Before commit, run `bash scripts/quality_gate.sh` and resolve any OPEN hits (BANNED and over-CAP findings block; WATCH counts inform the audits above and `output/tics.md`). At Phase 8 and final assembly, run `bash scripts/quality_gate.sh --book-level` for the cross-chapter accumulation report and queue prose audits for chapters far above median WATCH density. Reading-guide tics that the registry does not cover are checked by judgment; recurring ones should be added to the run's allowlist defenses or tracked in `output/tics.md`.
 
 Legitimate register-specific exceptions can be allowlisted in `output/quality_gate_allowlist.txt` using the exact key printed by the report. Every allowlisted hit must be defended on the relevant chapter card or in `output/style_and_voice.md`. The allowlist is a narrow register-defense mechanism, not a way to skip revision.
 
@@ -276,9 +311,9 @@ Legitimate register-specific exceptions can be allowlisted in `output/quality_ga
 chapter | pattern | count | examples (line numbers)
 ```
 
-The reading guide may specify book-specific tic patterns to track (motif caps, repeated-formula caps, character-specific tic limits). Track them too. A pattern appearing more than twice in one chapter or four times across the book is a tic unless explicitly defended on the chapter card or `output/style_and_voice.md` as a deliberate signature.
+The reading guide may specify book-specific tic patterns to track (motif caps, repeated-formula caps, character-specific tic limits). Track them too. A pattern appearing more than twice in one chapter or four times across the book is a tic unless explicitly defended on the chapter card or `output/style_and_voice.md` as a deliberate signature. The quality gate's per-chapter WATCH counts are the mechanical seed for this file — append them at every commit; the Accumulation Principle (density, not single instances, is what flattens prose) governs how you read them.
 
-If the judgment check, any adversarial pass, or the mechanical check fails, **do not defer to a later pass.** Repair before commit. A chapter with open quality findings does not count toward final assembly.
+If the judgment check, any audit, or the mechanical check fails, **do not defer to a later pass.** Repair before commit. A chapter with open quality findings does not count toward final assembly.
 
 ## Length
 
@@ -298,9 +333,12 @@ Do not create or treat `output/final/novel.md` as a completed final candidate un
 - every provisional single-model chapter has received opposing-model pressure and a synthesis memo, or is explicitly called out as an exception in `final_report.md`
 - major structural revisions have been considered and, where useful, performed
 - the ending and standalone payoff have survived brutal review
-- continuity and reveal/payoff state are coherent
-- `bash scripts/quality_gate.sh` passes with zero open hits
-- if the reading guide declares specific adversarial passes mandatory for this book, coverage exists for every chapter that should have received them
+- continuity and reveal/payoff state are coherent: every fact in `output/continuity.md`, `output/canon_sheet.md`, and `output/timeline.md` verifiable in the manuscript; `output/thread_ledger.md` shows every seed paid off or deliberately resonant and every PROTECTED thread resolved or accepted-as-open with reasons
+- `bash scripts/quality_gate.sh` passes with zero open hits AND `--book-level` has been run on the final candidate with its accumulation findings acted on
+- **audit coverage is complete per `../checks/audit_manifest.tsv`**: every chapter has every core audit; every risk audit ran wherever its trigger was ever true; every book audit ran on the assembly candidate — verified mechanically from audit output filenames and recorded in the final report
+- the Final Test (`../checks/protocols/final_test.md`) and the required checks (`../checks/protocols/required_checks.md`) pass on the assembled manuscript
+- the `llm_judge_rubric` evaluation has been run by a fresh Claude session on the assembly candidate and its scores and findings are recorded
+- `ending_earn` returns EARNS
 - **a Claude Fable 5 full-book cold read has been run on the assembly candidate and its findings have been resolved, deferred with recorded reasons, or explicitly rejected with reasons in `output/critiques/claude/final_cold_read.md`.** This is not optional. Disagreements with Codex's assessment are valuable and should not be reconciled by fiat.
 
 Before this point, assembled manuscripts should be called drafts or checkpoints.
@@ -334,8 +372,10 @@ At the end produce `output/final/novel.md` and `output/final/final_report.md`. T
 - per-chapter provenance summary: drafting/synthesis lane, raw drafts used, opposing critique path, synthesis memo path, single-model exceptions
 - chapters added/removed/split/merged
 - major plot/reveal/ending changes
-- continuity and payoff summary
-- whether reading-guide-mandated passes (Dialogue Doctor / Comedy Doctor / Clarity / etc.) achieved full coverage
+- continuity and payoff summary (continuity reconciliation outcome; thread-ledger final state; any `[verify]` placeholders that survived and why)
+- **audit coverage matrix**: per chapter × per applicable audit, ran/finding-count/disposition — with any gaps explained
+- `llm_judge_rubric` scores and the strongest dissent from any audit that was overruled
+- whether reading-guide-mandated audits (Dialogue Doctor / Comedy Doctor / Clarity / etc.) achieved full coverage
 - reader-enthusiasm assessment
 - major remaining risks
 - candid self-assessment: strongest scene, weakest surviving scene, most divisive choice, most derivative surviving choice, likely reader complaints, what was done about them
