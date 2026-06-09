@@ -1,0 +1,80 @@
+id	name	owner	tier	trigger	output_pattern	source_ref
+claude_tic_audit	Claude-Tic Audit (Codex audits every Claude draft/revision)	codex	core	every-chapter	{audit_root}/codex/chapter_{NN}.claude_tic_audit.md	verve-legacy task prompts + collation model-attributed tics
+codex_tic_audit	Codex-Tic Audit (Claude audits Codex-originated material)	claude	risk	event:codex-parallel-draft	{audit_root}/claude/chapter_{NN}.codex_tic_audit.md	verve-legacy adversarial register (Claude-on-Codex side)
+consequence_test	Consequence Test (scene state-change)	codex	core	every-chapter	{audit_root}/codex/chapter_{NN}.consequence_test.md	collation:4376-4378 [BANNED Consequence Test] + 4383-4391 scene-level craft
+opening_hook	Opening Hook Audit (first 50 words)	codex	core	every-chapter	{audit_root}/codex/chapter_{NN}.opening_hook.md	verve-legacy editor + collation weak-endings/openers
+ending_quality	Ending Quality Audit (weak/summarizing endings, stillness closes)	codex	core	every-chapter	{audit_root}/codex/chapter_{NN}.ending_quality.md	collation:87 weak endings + 4604-4669 [2.31 + For Endings + Instead of Stillness Endings + Phase 8]
+surprise_audit	Surprise Audit (the unpredicted move)	codex	core	every-chapter	{audit_root}/codex/chapter_{NN}.surprise_audit.md	verve-legacy editor Surprise Audit
+unresolved_threads	Unresolved-Threads Protection Audit	codex	core	every-chapter	{audit_root}/codex/chapter_{NN}.unresolved_threads.md	collation:4399-4478 [Reddit 5 Fix 1 + Quick Test]
+continuity_check_immediate	Immediate Continuity Check (post-draft)	codex	core	every-chapter	{audit_root}/codex/chapter_{NN}.continuity_check.md	collation:5933-5949 [Reddit 9 continuity checks] + verve-legacy tracker reconciliation
+voice_cover_names	Cover-the-Names Voice Test	codex	core	every-chapter	{audit_root}/codex/chapter_{NN}.voice_cover_names.md	collation:3382-3464 [Reddit 4 The Real Test] + verve-legacy distinguishable-without-tags
+editor_scored_check	Editor-Not-Satisfied-Customer Scored Check	codex	core	every-chapter	{audit_root}/codex/chapter_{NN}.editor_scored_check.md	collation:6056-6077 [Reddit 9 check like an editor]
+convenient_invention	Convenient-Invention Fact-Check (post-edit diff vs canon)	codex	core	every-revised-chapter	{audit_root}/codex/chapter_{NN}.convenient_invention.md	collation:3464+ [field guide 17] + 5250-5254 fact-checking after AI editing
+dialogue_doctor	Dialogue Doctor	claude	core	flag:dialogue-scenes (per dialogue_scene_manifest)	{audit_root}/claude/chapter_{NN}.dialogue_doctor.md	verve-legacy Dialogue Doctor + collation dialogue rules
+shared_vocab_conformance	Shared-Vocabulary Ban Conformance	codex	core	every-chapter	{audit_root}/codex/chapter_{NN}.shared_vocab.md	collation:3382+ [Reddit 4 Fix 3 ban the shared vocabulary]
+positive_prose_audit	Positive Prose Audit (LLM-clean generic prose)	claude	risk	sample:every-3rd-chapter + watch:vocab-clusters	{audit_root}/claude/chapter_{NN}.positive_prose.md	verve-legacy Positive Prose Audit
+purple_prose	Purple Prose & Show-Don't-Tell Audit	claude	risk	watch:vocab-clusters + flag:lyric	{audit_root}/claude/chapter_{NN}.purple_prose.md	collation:85 [LLM outputs purple prose] + show/tell entries
+false_profound_negation	False-Profound Negation Audit	codex	risk	watch:negation-patterns	{audit_root}/codex/chapter_{NN}.false_profound_negation.md	collation:784-793 [field guide 7]
+hedging_commitment	Hedging / Narratorial Commitment Audit	claude	risk	watch:hedging-cluster	{audit_root}/claude/chapter_{NN}.hedging_commitment.md	collation:81 [LLM outputs hedge tax]
+regularity_master_test	Read-Aloud Regularity Master Test	claude	risk	flag:prose-variability-fail + sample:per-act	{audit_root}/claude/chapter_{NN}.regularity_master_test.md	collation:3294+ [field guide MASTER TEST] + ruleset watch-regularity
+performance_check	Performance Check (keynote cadence, applause endings)	codex	risk	watch:performance-phrases	{audit_root}/codex/chapter_{NN}.performance_check.md	collation:2703+ [Writing ruleset rule 7 do not perform]
+thought_development	Thought-Development Audit (pre-solved prose)	claude	risk	flag:reflective-chapter	{audit_root}/claude/chapter_{NN}.thought_development.md	collation:2703+ [Writing ruleset rule 11]
+catalog_prose	Catalog-Prose / System-Tour Audit	codex	risk	watch:shopping-list + flag:worldbuilding-heavy	{audit_root}/codex/chapter_{NN}.catalog_prose.md	collation:2703+ [Writing ruleset rule 13] + field guide 10
+rhythm_vs_clarity	Rhythm-vs-Clarity Audit	claude	risk	flag:stylized-prose	{audit_root}/claude/chapter_{NN}.rhythm_vs_clarity.md	collation:3119+ [BANNED Rhythm vs. Clarity]
+specificity_test	Specificity Test (portable-line)	codex	risk	sample:every-3rd-chapter	{audit_root}/codex/chapter_{NN}.specificity_test.md	collation:4318-4320 [BANNED Specificity Test]
+interchangeability_test	Interchangeability Test (any-character line)	codex	risk	sample:every-3rd-chapter	{audit_root}/codex/chapter_{NN}.interchangeability_test.md	collation:4321-4323 [BANNED Interchangeability Test]
+earned_test	Earned Test (announced vs built-to beats)	codex	risk	flag:emotional-peak	{audit_root}/codex/chapter_{NN}.earned_test.md	collation:4324-4326 [BANNED Earned Test]
+decoration_test	Decoration Test (ornament vs work)	codex	risk	watch:figuration-density	{audit_root}/codex/chapter_{NN}.decoration_test.md	collation:1854-1862 [BANNED Decoration Test]
+sanitization_audit	Sanitization / Dark-Theme Dilution Audit	claude	risk	flag:dark-content	{audit_root}/claude/chapter_{NN}.sanitization_audit.md	collation:91 + drafter constitution rule 10/11/12
+clean_fight_test	Clean-Fight Test (violence realism)	claude	risk	flag:violence	{audit_root}/claude/chapter_{NN}.clean_fight.md	collation:2236-2245 [field guide 12]
+sensory_checklist_check	Sensory-Checklist Audit (three-smells pattern)	codex	risk	watch:sensory-checklist	{audit_root}/codex/chapter_{NN}.sensory_checklist.md	collation:1226-1236 [field guide 2]
+figuration_audit	Figurative Language Audit (earned figuration battery)	claude	risk	flag:figuration-heavy	{audit_root}/claude/chapter_{NN}.figuration_audit.md	verve-legacy Figurative Language Audit + quality_brief earned-figuration tests
+comedy_doctor	Comedy Doctor	claude	risk	flag:comic-register (reading-guide-mandated => every-chapter)	{audit_root}/claude/chapter_{NN}.comedy_doctor.md	verve-legacy Comedy Doctor
+clarity_pass	Fresh-Reader Clarity Pass	claude	risk	flag:dense-or-system-heavy	{audit_root}/claude/chapter_{NN}.clarity_pass.md	verve-legacy Fresh-Reader Clarity Pass
+genericization_regression	Regression-to-the-Mean / Genericization Audit	claude	risk	sample:every-4th-chapter	{audit_root}/claude/chapter_{NN}.genericization.md	wikipedia:WP:AIWTW intro (specific facts fade into generic importance)
+weasel_attribution	Weasel-Attribution Audit	codex	risk	watch:wp-aiweasel	{audit_root}/codex/chapter_{NN}.weasel_attribution.md	wikipedia:WP:AIWEASEL
+undue_significance	Undue-Significance Audit (essay drift)	codex	risk	watch:wp-ailegacy + watch:legacy-puffery	{audit_root}/codex/chapter_{NN}.undue_significance.md	wikipedia:WP:AILEGACY + collation 2.35
+reaction_divergence	Reaction-Divergence Test (same stimulus, different characters)	codex	risk	flag:multi-character-scene	{audit_root}/codex/chapter_{NN}.reaction_divergence.md	collation:3588+ [Reddit 4 Fix 4]
+characters_wrong	Let-Characters-Be-Wrong / Competence-Default Audit	claude	risk	sample:every-3rd-chapter	{audit_root}/claude/chapter_{NN}.characters_wrong.md	collation:3588+ [Reddit 4 Fix 5]
+frictionless_competence	Frictionless-Competence-Fantasy Audit	codex	risk	watch:competence-porn	{audit_root}/codex/chapter_{NN}.frictionless_competence.md	collation:3588+ [field guide 16]
+emotional_spiral	Emotional-Spiral Repetition Audit	claude	risk	watch:interiority-repetition	{audit_root}/claude/chapter_{NN}.emotional_spiral.md	collation:3753-3760 [field guide 13]
+narrator_publicist	Narrator-Publicist Audit (critical distance)	claude	risk	sample:every-4th-chapter + flag:protagonist-heavy	{audit_root}/claude/chapter_{NN}.narrator_publicist.md	collation:4025+ [field guide 9]
+emotional_subtitle	Emotional-Subtitle Audit (dialogue + redundant label)	codex	risk	watch:emotional-subtitle	{audit_root}/codex/chapter_{NN}.emotional_subtitle.md	collation:4142-4147 [field guide 18]
+mentor_scene_check	Wisdom-Dispensing Mentor-Scene Audit	codex	risk	flag:mentor-scene	{audit_root}/codex/chapter_{NN}.mentor_scene.md	collation:3777+ [field guide 11]
+abstract_noun_character	Abstract-Noun Character-Description Audit	codex	risk	watch:abstract-noun-character	{audit_root}/codex/chapter_{NN}.abstract_noun_character.md	collation:3742-3749 [field guide 8]
+voice_check_protocol	Periodic Voice Check (rhythm/banned phrases/anachronisms)	claude	risk	cadence:every-5-chapters	{audit_root}/claude/voice_check_{NN}.md	collation:2557+ [Reddit 9 #9 voice checks]
+snapshot_conformance	Character-Snapshot Conformance Audit	codex	risk	flag:new-or-returning-character	{audit_root}/codex/chapter_{NN}.snapshot_conformance.md	collation:3330-3381 [Reddit 3 snapshots]
+complicate_dont_resolve	Complicate-Don't-Resolve Audit	codex	risk	sample:every-2nd-chapter	{audit_root}/codex/chapter_{NN}.complicate.md	collation:4399+ [Reddit 5 Fix 2]
+yes_but_no_and	Yes-But / No-And Outcome Audit	codex	risk	sample:every-2nd-chapter	{audit_root}/codex/chapter_{NN}.yes_but_no_and.md	collation:4399+ [Reddit 5 Fix 3]
+seed_payoff	Seed/Payoff Audit (vs thread ledger)	codex	risk	cadence:every-5-chapters	{audit_root}/codex/seed_payoff_{NN}.md	collation:4854+ [Reddit 5 Fix 5] + thread ledger scaffold
+tempo_variation	Tempo-Variation Audit	codex	risk	cadence:per-act	{audit_root}/codex/tempo_variation_{act}.md	collation:4854+ [Reddit 5 Fix 6] + prose_variability metrics
+fair_world_consequences	Fair-World / Consequences Audit	codex	risk	flag:plan-succeeds-easily	{audit_root}/codex/chapter_{NN}.fair_world.md	collation:4480+ [Reddit 6 #1-2 consequences and failure states]
+antagonist_pressure	Antagonist-Pressure Audit	codex	risk	cadence:per-act	{audit_root}/codex/antagonist_pressure_{act}.md	collation:4480+ [Reddit 6 #3 antagonists not obstacles]
+tension_naming	Tension-Naming Conformance Audit	codex	risk	flag:card-names-tension	{audit_root}/codex/chapter_{NN}.tension_naming.md	collation:4480+ [Reddit 6 #4 explicitly request tension]
+arc_position	Arc-Position Audit (does the chapter know its act?)	codex	risk	cadence:per-act	{audit_root}/codex/arc_position_{act}.md	collation:4399+ [Reddit 5 Fix 4 think in arcs]
+npc_offscreen_goals	NPC Offscreen-Goals Audit	codex	risk	cadence:every-3-chapters	{audit_root}/codex/npc_goals_{NN}.md	collation:5122-5134 [Reddit 7 Fix 1]
+meanwhile_audit	Meanwhile Audit (offscreen world motion)	codex	risk	cadence:every-3-chapters	{audit_root}/codex/meanwhile_{NN}.md	collation:5138-5149 [Reddit 7 Fix 2]
+time_visibility	Time-Visibility Audit	codex	risk	cadence:per-act	{audit_root}/codex/time_visibility_{act}.md	collation:5153-5168 [Reddit 7 Fix 3]
+ripple_effects	Ripple-Effects Audit (event consequences propagate)	codex	risk	event:major-plot-event	{audit_root}/codex/chapter_{NN}.ripple_effects.md	collation:5172-5187 [Reddit 7 Fix 4]
+world_coherence	World-Coherence Thought Experiment	claude	book	phase:mid-run + phase:full-book-critique	{audit_root}/claude/book.world_coherence.md	collation:5337-5345 [Reddit 7 thought experiment]
+ripple_audit_post_revision	Ripple Audit After Major Revisions	codex	risk	event:major-revision	{audit_root}/codex/ripple_audit_{rev}.md	collation:5953-5977 [Reddit 9 ripple audit]
+zoom_out_audit	Zoom-Out Audit (every few chapters vs outline + promise)	codex	risk	cadence:every-4-chapters	{audit_root}/codex/zoom_out_{NN}.md	collation:5565-5587 [Reddit 9 zoom out]
+plain_translation	Plain-Translation Audit (binding-register defense)	claude	risk	every-revised-chapter (editor core) + flag:register-drift (drafter)	{audit_root}/claude/chapter_{NN}.plain_translation.md	verve-legacy editor, genericized
+adversarial_register	Adversarial Register Audit (cross-model, both directions)	codex	core	every-revised-chapter	{audit_root}/codex/chapter_{NN}.adversarial_register.md	verve-legacy editor, genericized (comp-drift + genre-cliché checks calibration-driven)
+chaos_up	Chaos-Up Audit (amplification, calibration-gated)	claude	risk	calibration:amplification-direction-declared	{audit_root}/claude/chapter_{NN}.chaos_up.md	verve-legacy editor, genericized
+register_density	Calibration Register-Density Audit (calibration-gated)	codex	risk	calibration:density-baselines-present	{audit_root}/codex/chapter_{NN}.register_density.md	verve-legacy editor, genericized
+chat_variety	Conversation-Variety Audit (recurring speakers)	codex	risk	flag:recurring-conversation	{audit_root}/codex/chapter_{NN}.chat_variety.md	verve-legacy editor, genericized
+set_piece_intensity	Set-Piece Intensity Audit	codex	risk	flag:high-leverage-scene	{audit_root}/codex/chapter_{NN}.set_piece.md	verve-legacy editor, genericized
+counter_strip	Counter-Strip Audit (anti-over-correction)	codex	core	every-revised-chapter	{audit_root}/codex/chapter_{NN}.counter_strip.md	verve-legacy editor, genericized
+ending_earn	Ending-Earn Audit (final chapters + coda)	codex	book	phase:whole-book + phase:final-assembly	{audit_root}/codex/book.ending_earn.md	verve-legacy editor, genericized
+book_arc	Book-Level Intensity/Comedy Arc Audit	codex	book	phase:whole-book	{audit_root}/codex/book.arc.md	verve-legacy editor, genericized (register named by reading guide)
+motif_audit	Motif Audit (distribution + sharpness + arc)	codex	book	phase:whole-book	{audit_root}/codex/book.motif_audit.md	verve-legacy editor, genericized
+form_distribution	Form-Distribution Audit (vs reading-guide targets)	codex	book	phase:whole-book	{audit_root}/codex/book.form_distribution.md	verve-legacy editor, genericized
+chat_audit_book	Book-Level Conversation Audit (per recurring speaker)	codex	book	phase:whole-book	{audit_root}/codex/book.chat_audit.md	verve-legacy editor, genericized
+reverse_outline	Reverse-Outline / Structural Audit	codex	book	phase:full-book-critique	{audit_root}/codex/book.reverse_outline.md	collation:5466-5478 [Academic manual causal spine]
+macro_revision_diagnostics	Macro-Revision Diagnostics	codex	book	phase:full-book-critique	{audit_root}/codex/book.macro_revision.md	collation:7188-7200 [Academic manual macro revision]
+self_revision_checklists	Self-Revision Checklists (two 7-question lists)	codex	book	phase:full-book-critique	{audit_root}/codex/book.self_revision.md	collation:7204-7233 [Novel process checklists]
+llm_judge_rubric	LLM-Judge Rubric Evaluation	claude	book	phase:full-book-critique + phase:final-assembly	{audit_root}/claude/book.llm_judge.md	collation:7250-7291 [Evaluation toolkit]
+cold_read_full_book	Full-Book Cold Read (Claude, mandatory at final assembly)	claude	book	phase:full-book-critique + phase:final-assembly	{audit_root}/claude/final_cold_read.md	verve-legacy (mandatory final cold read)
+final_test	The Final Test (protocol 3.7 gate)	codex	book	phase:final-assembly	{audit_root}/codex/book.final_test.md	collation:7115-7122 [BANNED 3.7]
+anti_default_audit	Anti-Default / Derivative-Drift Audit (architecture)	claude	book	phase:architecture + phase:full-book-critique	{audit_root}/claude/book.anti_default.md	verve-legacy Phase 2 + quality_brief novelty sections
