@@ -10,10 +10,10 @@
   - `READING_GUIDE.md` (voice rules, register, motifs, form binding, length target)
   - Optional: calibration artifact (e.g., `*_register_calibration.md`) — observed drift, book-specific Gates, inviolable elements, optional amplification direction (the chaos-up/register-density audits only activate when this declares a direction)
   - Optional: `reader_impressions.md` — author-direction reactions captured during drafting; treated as BINDING editorial direction
-- `input/draft/` — the drafted manuscript as per-chapter Markdown files (one per chapter). The editor archives these to `output_edit/original_draft_archive/` before any edits.
+- `input/draft/` — the drafted manuscript as per-chapter Markdown files named `chapter_01.md`, `chapter_02.md`, ... (validation requires the `chapter_*.md` naming at the directory's top level). The editor archives these to `output_edit/original_draft_archive/` before any edits.
 - `input/artifacts/` — optional supporting artifacts from the drafting run (story_bible, continuity, skeleton, voice cards, tics, etc.). Treated as writer-intent evidence, not authority. **Note:** artifacts that prescribe specific chapter forms can bias the editor toward preserving those forms. Be selective about what you include.
 - `scripts/claude_logged_call.sh` — Claude wrapper (Fable 5 xhigh, logging, serialization, markdown extraction).
-- `scripts/quality_gate.sh` — wrapper for the shared tiered mechanical gate (`../checks/quality_gate.py`, 213-pattern registry, BANNED/CAP/WATCH) run on every revised chapter.
+- `scripts/quality_gate.sh` — wrapper for the shared tiered mechanical gate (`../checks/quality_gate.py`, 208-pattern registry, BANNED/CAP/WATCH) run on every revised chapter.
 - `../checks/` — shared check library: judgment-audit templates + `audit_manifest.tsv` schedule, protocols, scaffolds. See the root `COVERAGE_MATRIX.md` for provenance.
 - `scripts/inner_claude_smoke.sh` — Claude reachability check.
 - `launch.sh` — restartable 96-hour editor launcher.

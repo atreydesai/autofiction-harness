@@ -73,9 +73,17 @@ acquire_lock() {
     printf "%s\n" "$$" > "$LOCK_DIR/pid"
     return 0
   fi
-  local existing_pid
+  local existing_pid existing_codex_pid
   existing_pid="$(cat "$LOCK_DIR/pid" 2>/dev/null || true)"
   if [ -z "$existing_pid" ] || ! ps -p "$existing_pid" >/dev/null 2>&1; then
+    # a SIGKILLed launcher can leave its codex child running and still
+    # writing output_edit/; a second session would corrupt the workspace
+    existing_codex_pid="$(cat "$LOCK_DIR/codex_pid" 2>/dev/null || true)"
+    if [ -n "$existing_codex_pid" ] && ps -p "$existing_codex_pid" >/dev/null 2>&1; then
+      echo "[launcher] stale_launcher_but_codex_alive codex_pid=$existing_codex_pid; refusing to start a second session" >&2
+      echo "[launcher] wait for it to finish or kill it (kill $existing_codex_pid), then relaunch" >&2
+      exit "$EXIT_LOCKED"
+    fi
     echo "[launcher] stale_lock_detected pid=${existing_pid:-missing} lock_dir=$LOCK_DIR" >&2
     rm -rf "$LOCK_DIR"
     if mkdir "$LOCK_DIR" 2>/dev/null; then
@@ -88,7 +96,7 @@ acquire_lock() {
 }
 
 cleanup_lock() {
-  rm -f "$LOCK_DIR/pid" 2>/dev/null || true
+  rm -f "$LOCK_DIR/pid" "$LOCK_DIR/codex_pid" 2>/dev/null || true
   rmdir "$LOCK_DIR" 2>/dev/null || true
 }
 
@@ -96,6 +104,9 @@ handle_signal() {
   local code="$1"
   local signal="$2"
   echo "[launcher] interrupted signal=$signal; not restarting"
+  if [ -n "${CODEX_PID:-}" ] && kill -0 "$CODEX_PID" 2>/dev/null; then
+    kill -TERM "$CODEX_PID" 2>/dev/null || true
+  fi
   exit "$code"
 }
 
@@ -188,12 +199,34 @@ init_output_git() {
   [ "$rc" -eq 0 ] || echo "[launcher] git_initial_commit_skipped rc=$rc"
 }
 
+# Limit classification reads codex STDERR (where CLI/API errors surface),
+# never the stdout transcript: manuscript prose routinely contains phrases
+# like "payment failed" or "try again in the morning" and must not be
+# classified as billing/rate-limit failures. Only if stderr is empty does it
+# fall back to the tail of the combined log. The 429 alternation is
+# boundary-guarded so ordinary numbers (14,429 / line numbers) cannot match.
+CODEX_HARD_LIMIT_PATTERN="weekly[[:space:]-]*(usage[[:space:]-]*)?limit|weekly.*quota|credit(s)?[[:space:]-]*(limit|exhausted|exhaustion|expired)|quota[[:space:]-]*(exhausted|exhaustion|exceeded)|insufficient quota|billing[[:space:]-]*(failed|failure|disabled|suspended|required)|payment[[:space:]-]*(required|failed|failure)"
+CODEX_RECOVERABLE_LIMIT_PATTERN="rate limit|usage limit|too many requests|(5|five)[ -]?hour[ -]*(usage[ -]*)?(limit|quota)|(^|[^0-9,.])429([^0-9]|$)|try again (in|after|at)|resets? (in|at|after)|limit resets?"
+
+_codex_limit_match() {
+  local pattern="$1" err_file="$2" combined_file="${3:-}"
+  if [ -n "$err_file" ] && [ -s "$err_file" ]; then
+    tail -n 200 "$err_file" | grep -Eqi "$pattern"
+    return $?
+  fi
+  if [ -n "$combined_file" ] && [ -s "$combined_file" ]; then
+    tail -n 50 "$combined_file" | grep -Eqi "$pattern"
+    return $?
+  fi
+  return 1
+}
+
 codex_hard_limit_seen() {
-  tail -n 200 "$1" | grep -Eqi "weekly[[:space:]-]*(usage[[:space:]-]*)?limit|weekly.*quota|credit(s)?[[:space:]-]*(limit|exhausted|exhaustion|expired)|quota[[:space:]-]*(exhausted|exhaustion|exceeded)|insufficient quota|billing[[:space:]-]*(failed|failure|disabled|suspended|required)|payment[[:space:]-]*(required|failed|failure)"
+  _codex_limit_match "$CODEX_HARD_LIMIT_PATTERN" "$1" "${2:-}"
 }
 
 codex_recoverable_limit_seen() {
-  tail -n 200 "$1" | grep -Eqi "rate limit|usage limit|5[ -]?hour|five[ -]?hour|too many requests|429|try again (in|after|at)|resets? (in|at|after)|limit resets?"
+  _codex_limit_match "$CODEX_RECOVERABLE_LIMIT_PATTERN" "$1" "${2:-}"
 }
 
 claude_auth_failure_seen() {
@@ -217,24 +250,25 @@ validate_editor_inputs() {
 
 validate_codex_config() {
   [ "$SKIP_CODEX_VALIDATION" = "1" ] && { echo "[launcher] codex_validation skipped"; return 0; }
-  local validation_attempt=1 validation_log rc
+  local validation_attempt=1 validation_log validation_err rc
   while true; do
     validation_log="$LOG_DIR/codex_validation_${validation_attempt}.log"
+    validation_err="$LOG_DIR/codex_validation_${validation_attempt}.err.log"
     echo "[launcher] codex_validation_start attempt=$validation_attempt log=$validation_log"
     set +e
-    "$CODEX_BIN" exec --dangerously-bypass-approvals-and-sandbox --skip-git-repo-check -C "$PROJECT_ROOT" -m gpt-5.5 -c 'model_reasoning_effort="xhigh"' "Print exactly OK and exit." > "$validation_log" 2>&1
+    "$CODEX_BIN" exec --dangerously-bypass-approvals-and-sandbox --skip-git-repo-check -C "$PROJECT_ROOT" -m gpt-5.5 -c 'model_reasoning_effort="xhigh"' "Print exactly OK and exit." > "$validation_log" 2> "$validation_err"
     rc=$?
     set -e
     if [ "$rc" -eq 0 ] && grep -Eq "^[[:space:]]*OK[[:space:]]*$" "$validation_log"; then echo "[launcher] codex_validation_done"; return 0; fi
-    if codex_hard_limit_seen "$validation_log"; then echo "[launcher] codex_validation_hard_limit rc=$rc"; exit "$EXIT_HARD_LIMIT"; fi
-    if codex_recoverable_limit_seen "$validation_log" && [ "$validation_attempt" -lt "$CODEX_VALIDATION_MAX_RETRIES" ]; then
+    if codex_hard_limit_seen "$validation_err" "$validation_log"; then echo "[launcher] codex_validation_hard_limit rc=$rc"; exit "$EXIT_HARD_LIMIT"; fi
+    if codex_recoverable_limit_seen "$validation_err" "$validation_log" && [ "$validation_attempt" -lt "$CODEX_VALIDATION_MAX_RETRIES" ]; then
       echo "[launcher] codex_validation_recoverable_limit sleeping=${CODEX_RECOVERABLE_LIMIT_SLEEP_SECONDS}s attempt=$validation_attempt/$CODEX_VALIDATION_MAX_RETRIES"
       sleep_with_deadline "$CODEX_RECOVERABLE_LIMIT_SLEEP_SECONDS" "codex_validation_recoverable_limit" || exit 0
       validation_attempt=$((validation_attempt + 1))
       continue
     fi
     echo "[launcher] codex_validation_failed rc=$rc"
-    tail -n 20 "$validation_log"
+    tail -n 20 "$validation_log" "$validation_err" 2>/dev/null
     exit "$EXIT_VALIDATION_FAILED"
   done
 }
@@ -255,6 +289,7 @@ validate_claude_config() {
     echo "[launcher] claude_validation_auth_failed; run 'claude /login' interactively or provide Claude API credentials before launching"
   fi
   tail -n 20 "$validation_log"
+  echo "[launcher] set SKIP_CLAUDE_VALIDATION=1 to run Codex-only or if Claude validation is intentionally deferred"
   exit "$EXIT_CLAUDE_VALIDATION_FAILED"
 }
 
@@ -266,7 +301,7 @@ validate_codex_claude_bridge() {
   quoted_claude="$(printf "%q" "$resolved_claude")"
   echo "[launcher] codex_claude_bridge_validation_start log=$validation_log"
   set +e
-  "$CODEX_BIN" exec --dangerously-bypass-approvals-and-sandbox --skip-git-repo-check -C "$PROJECT_ROOT" -m gpt-5.5 -c 'model_reasoning_effort="xhigh"' "Setup validation only. Do not edit files. Run this exact shell command to verify Claude is reachable from inside the Codex execution environment: CLAUDE_BIN=$quoted_claude CLAUDE_DISALLOWED_TOOLS='$CLAUDE_DISALLOWED_TOOLS' CLAUDE_TOOLS='$CLAUDE_TOOLS' bash scripts/inner_claude_smoke.sh. If the command exits successfully and its output contains INNER_CLAUDE_OK, print exactly OK and exit. If it fails, print the failure briefly and exit nonzero." > "$validation_log" 2>&1
+  "$CODEX_BIN" exec --dangerously-bypass-approvals-and-sandbox --skip-git-repo-check -C "$PROJECT_ROOT" -m gpt-5.5 -c 'model_reasoning_effort="xhigh"' "Setup validation only. Do not edit files. Run this exact shell command to verify Claude is reachable from inside the Codex execution environment: CLAUDE_BIN=$quoted_claude CLAUDE_DISALLOWED_TOOLS='$CLAUDE_DISALLOWED_TOOLS' CLAUDE_TOOLS='$CLAUDE_TOOLS' bash scripts/inner_claude_smoke.sh. The smoke script verifies its own output. If the command exits 0, print exactly OK and exit. If it fails, print the failure briefly and exit nonzero." > "$validation_log" 2>&1
   rc=$?
   set -e
   if [ "$rc" -eq 0 ] && grep -Eq "^[[:space:]]*OK[[:space:]]*$" "$validation_log"; then echo "[launcher] codex_claude_bridge_validation_done"; return 0; fi
@@ -275,6 +310,7 @@ validate_codex_claude_bridge() {
     echo "[launcher] codex_claude_bridge_auth_failed; Claude is reachable as a binary but not authenticated inside the Codex execution environment"
   fi
   tail -n 40 "$validation_log"
+  echo "[launcher] set SKIP_CODEX_CLAUDE_BRIDGE_VALIDATION=1 to skip this integration preflight"
   exit "$EXIT_CLAUDE_VALIDATION_FAILED"
 }
 
@@ -313,17 +349,25 @@ while true; do
   attempt_count=$((attempt_count + 1))
   echo "[launcher] codex_start attempt=$attempt_count restart_count=$restart_count at=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
   ATTEMPT_LOG="$LOG_DIR/codex_attempt_${attempt_count}_$(date +%Y%m%d_%H%M%S).log"
+  ATTEMPT_ERR="${ATTEMPT_LOG%.log}.err.log"
   ln -sfn "$ATTEMPT_LOG" "$LOG_DIR/codex_attempt_current.log"
+  ln -sfn "$ATTEMPT_ERR" "$LOG_DIR/codex_attempt_current.err.log"
   echo "[launcher] attempt_log=$ATTEMPT_LOG"
 
+  # codex runs in the background so its pid can be recorded in the lock dir
+  # (a relaunch after launcher SIGKILL must not start a second session) and
+  # so INT/TERM traps fire promptly and can forward the signal to the child
   set +e
   if [ "$STREAM_CODEX_OUTPUT" = "1" ]; then
-    "$CODEX_BIN" exec --dangerously-bypass-approvals-and-sandbox --skip-git-repo-check -C "$PROJECT_ROOT" -m gpt-5.5 -c 'model_reasoning_effort="xhigh"' "$(task_prompt_with_deadline)" 2>&1 | tee "$ATTEMPT_LOG"
-    rc=${PIPESTATUS[0]}
+    "$CODEX_BIN" exec --dangerously-bypass-approvals-and-sandbox --skip-git-repo-check -C "$PROJECT_ROOT" -m gpt-5.5 -c 'model_reasoning_effort="xhigh"' "$(task_prompt_with_deadline)" > >(tee "$ATTEMPT_LOG") 2> "$ATTEMPT_ERR" &
   else
-    "$CODEX_BIN" exec --dangerously-bypass-approvals-and-sandbox --skip-git-repo-check -C "$PROJECT_ROOT" -m gpt-5.5 -c 'model_reasoning_effort="xhigh"' "$(task_prompt_with_deadline)" > "$ATTEMPT_LOG" 2>&1
-    rc=$?
+    "$CODEX_BIN" exec --dangerously-bypass-approvals-and-sandbox --skip-git-repo-check -C "$PROJECT_ROOT" -m gpt-5.5 -c 'model_reasoning_effort="xhigh"' "$(task_prompt_with_deadline)" > "$ATTEMPT_LOG" 2> "$ATTEMPT_ERR" &
   fi
+  CODEX_PID=$!
+  printf "%s\n" "$CODEX_PID" > "$LOCK_DIR/codex_pid"
+  wait "$CODEX_PID"
+  rc=$?
+  rm -f "$LOCK_DIR/codex_pid" 2>/dev/null
   set -e
 
   if [ "$rc" -eq 0 ]; then
@@ -336,8 +380,8 @@ while true; do
 
   echo "[launcher] codex_exit rc=$rc at=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
   if [ "$rc" -eq 130 ] || [ "$rc" -eq 143 ]; then echo "[launcher] interrupted; not restarting"; exit "$rc"; fi
-  if codex_hard_limit_seen "$ATTEMPT_LOG"; then echo "[launcher] codex_hard_limit_detected; not restarting"; exit "$EXIT_HARD_LIMIT"; fi
-  if codex_recoverable_limit_seen "$ATTEMPT_LOG"; then
+  if codex_hard_limit_seen "$ATTEMPT_ERR" "$ATTEMPT_LOG"; then echo "[launcher] codex_hard_limit_detected; not restarting"; exit "$EXIT_HARD_LIMIT"; fi
+  if codex_recoverable_limit_seen "$ATTEMPT_ERR" "$ATTEMPT_LOG"; then
     restart_count=$((restart_count + 1))
     recoverable_limit_count=$((recoverable_limit_count + 1))
     [ "$restart_count" -le "$MAX_RESTARTS" ] || { echo "[launcher] restart_limit_reached max_restarts=$MAX_RESTARTS"; exit "$EXIT_RESTART_LIMIT"; }
