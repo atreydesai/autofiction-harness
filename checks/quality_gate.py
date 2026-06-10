@@ -95,19 +95,22 @@ class Chapter:
     """Parsed chapter: scenes, paragraphs, line classifications."""
 
     def __init__(self, path, root):
-        self.path = Path(path)
+        # resolve so rel (the allowlist key prefix) is stable across invocation
+        # styles: glob vs explicit file args, relative paths, symlinks (/tmp)
+        self.path = Path(path).resolve()
         self.rel = str(self.path.relative_to(root)) if root in self.path.parents else str(self.path)
         raw = self.path.read_text(encoding="utf-8", errors="replace")
         self.raw_lines = raw.splitlines()
         self.lines = [normalize(l) for l in self.raw_lines]
         self.in_fence = [False] * len(self.lines)
-        fence = False
-        for i, l in enumerate(self.lines):
-            if FENCE_RE.match(l):
-                fence = not fence
-                self.in_fence[i] = True  # fence markers themselves excluded
-            else:
-                self.in_fence[i] = fence
+        fence_marks = [i for i, l in enumerate(self.lines) if FENCE_RE.match(l)]
+        if len(fence_marks) % 2 == 1:
+            # an unpaired fence marker would exempt the whole remainder of the
+            # chapter from scanning; treat it as prose, not an open fence
+            fence_marks = fence_marks[:-1]
+        for k in range(0, len(fence_marks), 2):
+            for j in range(fence_marks[k], fence_marks[k + 1] + 1):
+                self.in_fence[j] = True  # fence markers themselves excluded
         self.is_heading = [bool(HEADING_RE.match(l)) and not self.in_fence[i] for i, l in enumerate(self.lines)]
         self.is_hr = [bool(HR_RE.match(l)) and not self.in_fence[i] for i, l in enumerate(self.lines)]
         # scene index per line (scenes split on headings / horizontal rules)
@@ -145,20 +148,39 @@ class Chapter:
     def line_views(self, i):
         """Return (dialogue_text, narration_text, full_text) for a line."""
         line = self.lines[i]
-        spans = QUOTE_SPAN_RE.findall(line)
-        dialogue = " ".join(s[1:-1] for s in spans)
-        narration = QUOTE_SPAN_RE.sub(" ⁂ ", line)  # placeholder keeps word boundaries
-        return dialogue, narration, line
+        # An odd quote count means an unterminated span — standard typography
+        # for multi-paragraph speech (continuation paragraphs omit the closing
+        # quote). Everything after the unmatched quote is dialogue, not narration.
+        head, open_tail = line, None
+        quote_positions = [j for j, c in enumerate(line) if c == '"']
+        if len(quote_positions) % 2 == 1:
+            pos = quote_positions[-1]
+            head, open_tail = line[:pos], line[pos + 1:]
+        spans = QUOTE_SPAN_RE.findall(head)
+        parts = [s[1:-1] for s in spans]
+        narration = QUOTE_SPAN_RE.sub(" ⁂ ", head)  # placeholder keeps word boundaries
+        if open_tail is not None:
+            parts.append(open_tail)
+            narration += " ⁂ "
+        return " ".join(p for p in parts if p), narration, line
 
     def scannable(self, i):
         return not self.in_fence[i] and not self.is_hr[i]
 
     def opening_lines(self):
-        return self._para_lines(min(2, len(self.paragraphs)))
+        # first paragraph of each scene + first two paragraphs of the chapter
+        # (scope=opening rules are documented as scene-opening checks)
+        first_by_scene = {}
+        for idx, (start, text, scene) in enumerate(self.paragraphs):
+            first_by_scene.setdefault(scene, idx)
+        targets = set(first_by_scene.values())
+        targets.update(range(min(2, len(self.paragraphs))))
+        return self._para_lines(targets)
 
-    def _para_lines(self, n_paras):
+    def _para_lines(self, targets):
         out = set()
-        for start, _, _ in self.paragraphs[:n_paras]:
+        for idx in targets:
+            start, _, _ = self.paragraphs[idx]
             j = start
             while j < len(self.lines) and self.lines[j].strip():
                 if self.scannable(j):
@@ -167,21 +189,13 @@ class Chapter:
         return out
 
     def ending_lines(self):
-        out = set()
         # last paragraph of each scene + last two paragraphs of the chapter
         last_by_scene = {}
         for idx, (start, text, scene) in enumerate(self.paragraphs):
             last_by_scene[scene] = idx
         targets = set(last_by_scene.values())
         targets.update(range(max(0, len(self.paragraphs) - 2), len(self.paragraphs)))
-        for idx in targets:
-            start, text, _ = self.paragraphs[idx]
-            j = start
-            while j < len(self.lines) and self.lines[j].strip():
-                if self.scannable(j):
-                    out.add(j)
-                j += 1
-        return out
+        return self._para_lines(targets)
 
 
 class Finding:
@@ -196,6 +210,8 @@ def esc(s):
 def one_sentence_paragraphs(ch):
     out = []
     for start, text, scene in ch.paragraphs:
+        if '"' in text:
+            continue  # dialogue lines with tags are normal speech, not gravity beats
         sentences = [s for s in SENT_SPLIT_RE.split(text) if s.strip()]
         if len(sentences) == 1 and len(WORD_RE.findall(text)) <= 25:
             out.append((start, text, scene))
@@ -276,6 +292,25 @@ def run_structure_engine(pat, ch):
 
 def regex_hits(pat, ch):
     """Return [(line_number, evidence, scene)] for a regex pattern, honoring scope."""
+    if pat.engine == "per-paragraph":
+        # evaluate per paragraph instead of per line, still honoring scope:
+        # the paragraph text is rebuilt from the scope view of each line so
+        # narration-scoped rows do not fire on text inside dialogue quotes
+        hits = []
+        for start, text, scene in ch.paragraphs:
+            if pat.scope in ("dialogue", "narration"):
+                parts = []
+                j = start
+                while j < len(ch.lines) and ch.lines[j].strip():
+                    if ch.scannable(j) and not ch.is_heading[j]:
+                        dialogue, narration, _ = ch.line_views(j)
+                        parts.append(dialogue if pat.scope == "dialogue" else narration)
+                    j += 1
+                text = " ".join(p for p in parts if p)
+            m = pat.regex.search(text)
+            if m:
+                hits.append((start + 1, m.group(0)[:100].strip(), scene))
+        return hits
     hits = []
     opening = ch.opening_lines() if pat.scope == "opening" else None
     ending = ch.ending_lines() if pat.scope == "ending" else None
@@ -320,27 +355,36 @@ def regex_hits(pat, ch):
             merged.append((line, evd, scene))
             prev_line = line
         hits = merged
-    if pat.engine == "per-paragraph":
-        # evaluate per paragraph instead of per line
-        hits = []
-        for start, text, scene in ch.paragraphs:
-            m = pat.regex.search(text)
-            if m:
-                hits.append((start + 1, m.group(0)[:100].strip(), scene))
     return hits
 
 
+# engines that fully replace the row's regex (any regex is only a documented
+# approximation); 'consecutive'/'per-paragraph' modify regex scanning instead,
+# and 'emdash-density' is an annotation merged into its regex density row
+STRUCTURE_ENGINES = {
+    "para-one-sentence", "repeated-descriptor", "title-case-headings",
+    "bold-density", "inline-header-list", "thematic-break-before-heading",
+    "skipped-heading-level", "table-in-prose", "quote-style-inconsistency",
+}
+
+
 def evaluate_chapter(ch, patterns, allow):
-    findings, watch = [], {}
+    findings, watch, book_hits = [], {}, {}
     for pat in patterns:
-        # structure-engine rows: __ENGINE__ regex (or engine keyword without a usable regex)
-        if pat.regex is None and (pat.engine or pat.scope == "document"):
+        if pat.engine in STRUCTURE_ENGINES or (pat.regex is None and (pat.engine or pat.scope == "document")):
             count, ev = run_structure_engine(pat, ch)
             if count and pat.tier == "WATCH":
                 watch[pat.id] = watch.get(pat.id, 0) + count
                 findings.append(Finding(ch.rel, ev[0][0], pat, "WATCH", f"{count} occurrence(s); first: {ev[0][1]}"))
-            elif count and pat.tier == "CAP" and pat.threshold is not None and count > pat.threshold:
-                findings.append(_status(ch, 0, pat, allow, f"count {count} > cap {pat.threshold}"))
+            elif count and pat.tier == "CAP" and pat.threshold is not None:
+                hits = [(line, evd, ch.scene_of[line - 1] if 0 < line <= len(ch.lines) else 0)
+                        for line, evd in ev]
+                if pat.unit == "book":
+                    book_hits[pat.id] = book_hits.get(pat.id, 0) + count
+                    findings.append(Finding(ch.rel, hits[0][0], pat, "WATCH",
+                                            f"{count} occurrence(s) (book-unit cap; enforced with --book-level)"))
+                else:
+                    findings.extend(_evaluate_cap(ch, pat, hits, allow))
             elif count and pat.tier == "BANNED":
                 for line, evd in ev:
                     findings.append(_status(ch, line, pat, allow, evd))
@@ -358,8 +402,13 @@ def evaluate_chapter(ch, patterns, allow):
             findings.append(Finding(ch.rel, hits[0][0], pat, "WATCH",
                                     f"{len(hits)} occurrence(s); first: {hits[0][1]}"))
         elif pat.tier == "CAP":
-            findings.extend(_evaluate_cap(ch, pat, hits, allow))
-    return findings, watch
+            if pat.unit == "book":
+                book_hits[pat.id] = book_hits.get(pat.id, 0) + len(hits)
+                findings.append(Finding(ch.rel, hits[0][0], pat, "WATCH",
+                                        f"{len(hits)} occurrence(s) (book-unit cap; enforced with --book-level)"))
+            else:
+                findings.extend(_evaluate_cap(ch, pat, hits, allow))
+    return findings, watch, book_hits
 
 
 def _evaluate_cap(ch, pat, hits, allow):
@@ -381,10 +430,6 @@ def _evaluate_cap(ch, pat, hits, allow):
         if rate > pat.threshold:
             out.append(_status(ch, hits[0][0], pat, allow,
                                f"{len(hits)} hits = {rate:.1f}/1k words > cap {pat.threshold}; first: {hits[0][1]}"))
-    elif pat.unit == "book":
-        # book-unit caps are evaluated in book mode; report as WATCH here
-        out.append(Finding(ch.rel, hits[0][0], pat, "WATCH",
-                           f"{len(hits)} occurrence(s) (book-unit cap, judged at book level)"))
     return out
 
 
@@ -394,7 +439,7 @@ def _status(ch, line, pat, allow, evidence):
     return Finding(ch.rel, line, pat, status, evidence)
 
 
-def book_report(chapters, all_watch, patterns, report_lines):
+def book_report(chapters, all_watch, report_lines):
     report_lines.append("\n## Book-level accumulation report\n")
     report_lines.append("Per the Accumulation Principle: no single element makes prose bad; density does. "
                         "Chapters whose WATCH density is far above the manuscript median deserve a "
@@ -423,7 +468,9 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--output-dir", required=True, help="stage output dir (drafter: output/, editor: output_edit/)")
     ap.add_argument("--chapters-dir", default=None, help="default: <output-dir>/chapters")
-    ap.add_argument("--patterns-dir", default=None, help="default: <this file's dir>/patterns")
+    ap.add_argument("--patterns-dir", action="append", default=None,
+                    help="pattern registry dir; repeatable — extra dirs EXTEND the registry "
+                         "(default: <this file's dir>/patterns)")
     ap.add_argument("--report", default=None, help="markdown report path")
     ap.add_argument("--json-out", default=None, help="JSON summary path")
     ap.add_argument("--allowlist", default=None, help="default: <output-dir>/quality_gate_allowlist.txt")
@@ -434,12 +481,20 @@ def main():
     out_dir = Path(args.output_dir).resolve()
     root = out_dir.parent
     chapters_dir = Path(args.chapters_dir) if args.chapters_dir else out_dir / "chapters"
-    patterns_dir = Path(args.patterns_dir) if args.patterns_dir else Path(__file__).resolve().parent / "patterns"
+    default_patterns = Path(__file__).resolve().parent / "patterns"
+    patterns_dirs, seen_dirs = [], set()
+    for d in ([Path(p) for p in args.patterns_dir] if args.patterns_dir else [default_patterns]):
+        r = d.resolve()
+        if r not in seen_dirs:
+            seen_dirs.add(r)
+            patterns_dirs.append(d)
     report_path = Path(args.report) if args.report else out_dir / "critiques" / "codex" / "mechanical" / "quality_gate_report.md"
     json_path = Path(args.json_out) if args.json_out else report_path.with_suffix(".json")
     allow_path = Path(args.allowlist) if args.allowlist else out_dir / "quality_gate_allowlist.txt"
 
-    patterns = load_patterns(patterns_dir)
+    patterns = []
+    for d in patterns_dirs:
+        patterns.extend(load_patterns(d))
     allow = set()
     if allow_path.is_file():
         allow = {l.strip() for l in allow_path.read_text(encoding="utf-8").splitlines() if l.strip()}
@@ -467,11 +522,14 @@ def main():
 
     open_count = allowlisted = watch_total = 0
     all_watch = {}
+    all_book = {}
     per_chapter = []
     json_summary = {"chapters": {}, "open": 0, "allowlisted": 0, "watch": {}}
     for f in files:
         ch = Chapter(f, root)
-        findings, watch = evaluate_chapter(ch, patterns, allow)
+        findings, watch, book_hits = evaluate_chapter(ch, patterns, allow)
+        for k, v in book_hits.items():
+            all_book[k] = all_book.get(k, 0) + v
         ch_open = 0
         for fd in sorted(findings, key=lambda x: (x.line, x.pattern.id)):
             if fd.status == "OPEN":
@@ -488,12 +546,24 @@ def main():
         per_chapter.append((ch, ch_open, ch_watch))
         json_summary["chapters"][ch.rel] = {"open": ch_open, "watch": watch, "words": ch.word_count}
 
+    if args.book_level:
+        # enforce book-unit CAP thresholds across the whole scanned set
+        for pat in patterns:
+            if pat.tier == "CAP" and pat.unit == "book" and pat.threshold is not None:
+                total = all_book.get(pat.id, 0)
+                if total > pat.threshold:
+                    open_count += 1
+                    lines.append(f"| `BOOK` | 0 | {esc(pat.id)} | CAP | OPEN "
+                                 f"| book total {total} > cap {pat.threshold} |")
+
     json_summary["open"] = open_count
     json_summary["allowlisted"] = allowlisted
     json_summary["watch"] = all_watch
+    if all_book:
+        json_summary["book_caps"] = all_book
 
     if args.book_level:
-        book_report(per_chapter, all_watch, patterns, lines)
+        book_report(per_chapter, all_watch, lines)
 
     lines += ["", f"Open findings: {open_count}", f"Allowlisted: {allowlisted}",
               f"WATCH hits (non-blocking, feed the judgment audits and tics tracker): {watch_total}"]
