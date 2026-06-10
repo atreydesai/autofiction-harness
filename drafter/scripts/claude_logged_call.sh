@@ -105,6 +105,21 @@ done
 # Default chapter to "global" for whole-book / cross-chapter calls
 [ -n "$chapter" ] || chapter="global"
 
+# Ledger fields are tab-separated; reject values that would corrupt rows
+safe_ledger_field() {
+  case "$1" in
+    '') return 1 ;;
+    *[!A-Za-z0-9._-]*) return 1 ;;
+    *) return 0 ;;
+  esac
+}
+safe_ledger_field "$kind" || die "--kind must contain only [A-Za-z0-9._-]: $kind"
+safe_ledger_field "$chapter" || die "--chapter must contain only [A-Za-z0-9._-]: $chapter"
+safe_ledger_field "$scene" || die "--scene must contain only [A-Za-z0-9._-]: $scene"
+case "$prompt_file$out$md_out" in
+  *$'\t'*|*$'\n'*) die "paths must not contain tabs or newlines" ;;
+esac
+
 case "$out" in
   output/*.stream.jsonl) ;;
   *) die "--out must be an output/*.stream.jsonl path" ;;
@@ -140,15 +155,53 @@ if [ -n "$md_out" ]; then
 fi
 md_log_path="${md_out:-"-"}"
 
+GUARD_STALE_GRACE_SECONDS="${CLAUDE_GUARD_STALE_GRACE_SECONDS:-30}"
+
+dir_age_seconds() {
+  local mtime
+  mtime="$(stat -f %m "$1" 2>/dev/null || stat -c %Y "$1" 2>/dev/null || echo "")"
+  if [ -z "$mtime" ]; then
+    echo 0
+    return
+  fi
+  echo "$(( $(date +%s) - mtime ))"
+}
+
+lock_dir_is_stale() {
+  local dir="$1"
+  local old_pid
+  if [ -f "$dir/pid" ]; then
+    old_pid="$(cat "$dir/pid" 2>/dev/null || true)"
+    if [ -n "$old_pid" ]; then
+      kill -0 "$old_pid" 2>/dev/null && return 1
+      return 0
+    fi
+  fi
+  # Missing/empty pid file: the owner died between mkdir and the pid write,
+  # or is still inside that window. Without this branch one ill-timed kill
+  # would deadlock every future call; the grace period protects live owners.
+  [ "$(dir_age_seconds "$dir")" -gt "$GUARD_STALE_GRACE_SECONDS" ]
+}
+
+# Reclaim via atomic rename: only one contender's mv can succeed, and the
+# rm -rf only ever targets the privately renamed dir — never a lock another
+# process may have just re-acquired (closes the rm -rf TOCTOU race).
+reclaim_lock_dir() {
+  local dir="$1"
+  local trash="$dir.reaping.$$"
+  if mv "$dir" "$trash" 2>/dev/null; then
+    rm -rf "$trash"
+    return 0
+  fi
+  return 1
+}
+
 mutex_held=0
 acquire_mutex() {
   while ! mkdir "$mutex_dir" 2>/dev/null; do
-    if [ -f "$mutex_dir/pid" ]; then
-      old_pid="$(cat "$mutex_dir/pid" 2>/dev/null || true)"
-      if [ -n "$old_pid" ] && ! kill -0 "$old_pid" 2>/dev/null; then
-        rm -rf "$mutex_dir"
-        continue
-      fi
+    if [ -d "$mutex_dir" ] && lock_dir_is_stale "$mutex_dir"; then
+      reclaim_lock_dir "$mutex_dir" || true
+      continue
     fi
     sleep 1
   done
@@ -174,11 +227,9 @@ acquire_slot() {
         slot_path="$candidate"
         return 0
       fi
-      if [ -f "$candidate/pid" ]; then
-        old_pid="$(cat "$candidate/pid" 2>/dev/null || true)"
-        if [ -n "$old_pid" ] && ! kill -0 "$old_pid" 2>/dev/null; then
-          rm -rf "$candidate"
-        fi
+      if [ -d "$candidate" ] && lock_dir_is_stale "$candidate"; then
+        reclaim_lock_dir "$candidate" || true
+        continue
       fi
       i=$((i + 1))
     done
@@ -219,6 +270,15 @@ set +e
 exit_code="$?"
 set -e
 
+if [ "$exit_code" -ne 0 ] && [ -e "$out" ]; then
+  # The redirect created $out before claude failed; renaming it preserves the
+  # partial stream for forensics AND unblocks a retry with the same --out
+  # (the no-overwrite guard would otherwise reject every retry).
+  failed_out="$out.failed.$(date +%s)"
+  mv "$out" "$failed_out" 2>/dev/null || true
+  echo "claude_logged_call: claude exited rc=$exit_code; partial stream preserved at $failed_out; retry with the same --out is unblocked" >&2
+fi
+
 if [ "$exit_code" -eq 0 ] && [ -n "$md_out" ]; then
   set +e
   python3 - "$out" "$md_out" <<'PY'
@@ -229,7 +289,9 @@ from pathlib import Path
 stream_path = Path(sys.argv[1])
 md_path = Path(sys.argv[2])
 assistant_texts = []
-result_texts = []
+result_text = None
+result_seen = False
+result_error = None
 partial_texts = []
 
 with stream_path.open('r', encoding='utf-8') as stream:
@@ -255,14 +317,25 @@ with stream_path.open('r', encoding='utf-8') as stream:
             if isinstance(text, str) and text:
                 partial_texts.append(text)
         elif event_type == 'result':
+            result_seen = True
+            if event.get('is_error') or event.get('subtype') not in (None, 'success'):
+                result_error = event.get('subtype') or 'is_error'
             result = event.get('result')
             if isinstance(result, str) and result:
-                result_texts.append(result)
+                result_text = result
 
-if assistant_texts:
-    markdown = '\n\n'.join(text.rstrip() for text in assistant_texts if text.strip())
-elif result_texts:
-    markdown = '\n\n'.join(text.rstrip() for text in result_texts if text.strip())
+if result_error:
+    raise SystemExit(f'session ended in error ({result_error}); refusing to write {md_path}')
+if not result_seen:
+    raise SystemExit(f'no result event in {stream_path} (stream truncated?); refusing to write {md_path}')
+
+# Prefer the result event's final text: with tools enabled the assistant
+# stream contains interim narration before tool calls ("Let me read the
+# canon sheet first.") that must not be baked into the saved artifact.
+if result_text and result_text.strip():
+    markdown = result_text.rstrip()
+elif assistant_texts:
+    markdown = assistant_texts[-1].rstrip()
 elif partial_texts:
     markdown = ''.join(partial_texts).rstrip()
 else:
