@@ -1,7 +1,7 @@
 # Audit: Purple Prose & Show-Don't-Tell Audit
 
 id: purple_prose | owner: claude | tier: risk
-trigger: watch:vocab-clusters + flag:lyric
+trigger: watch:llm-catalog-ai-words + watch:wp-aivocab-cluster + flag:lyric
 output: {audit_root}/claude/chapter_{NN}.purple_prose.md   ({audit_root} = output/critiques for the drafter stage, output_edit/audits for the editor stage)
 source: collation:85 [LLM outputs purple prose] + show/tell entries
 

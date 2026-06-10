@@ -1,7 +1,7 @@
 # Audit: Performance Check (keynote cadence, applause endings)
 
 id: performance_check | owner: codex | tier: risk
-trigger: watch:performance-phrases
+trigger: watch:writing-formula-phrases + watch:ruleset-three-part-cadence
 output: {audit_root}/codex/chapter_{NN}.performance_check.md   ({audit_root} = output/critiques for the drafter stage, output_edit/audits for the editor stage)
 source: collation:2703+ [Writing ruleset rule 7 do not perform]
 

@@ -1,7 +1,7 @@
 # Audit: Emotional-Spiral Repetition Audit
 
 id: emotional_spiral | owner: claude | tier: risk
-trigger: watch:interiority-repetition
+trigger: watch:aiisms-2.2-vague-interiority-watch + watch:qscan-04-something-shifts-breaks-changes
 output: {audit_root}/claude/chapter_{NN}.emotional_spiral.md   ({audit_root} = output/critiques for the drafter stage, output_edit/audits for the editor stage)
 source: collation:3753-3760 [field guide 13]
 

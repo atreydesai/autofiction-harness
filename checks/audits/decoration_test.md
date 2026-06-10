@@ -1,7 +1,7 @@
 # Audit: Decoration Test (ornament vs work)
 
 id: decoration_test | owner: codex | tier: risk
-trigger: watch:figuration-density
+trigger: flag:figuration-heavy + watch:fieldguide-decorative-compound-modifier
 output: {audit_root}/codex/chapter_{NN}.decoration_test.md   ({audit_root} = output/critiques for the drafter stage, output_edit/audits for the editor stage)
 source: collation:1854-1862 [BANNED Decoration Test]
 
@@ -59,7 +59,8 @@ Chapter verdict:
 
 ## Procedure
 
-1. Pull the watch:figuration-density hit list from the pattern registry for this
+1. Pull the fieldguide-decorative-compound-modifier hits from {watch_counts} and the
+   gate report's figuration-related BANNED findings for this
    chapter; add every metaphor/simile/personification, every description block over
    two sentences, and every sensory-detail cluster (two or more sense impressions in
    one paragraph).

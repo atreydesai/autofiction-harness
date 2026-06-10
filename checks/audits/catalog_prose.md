@@ -1,7 +1,7 @@
 # Audit: Catalog-Prose / System-Tour Audit
 
 id: catalog_prose | owner: codex | tier: risk
-trigger: watch:shopping-list + flag:worldbuilding-heavy
+trigger: watch:fieldguide-shopping-list + flag:worldbuilding-heavy
 output: {audit_root}/codex/chapter_{NN}.catalog_prose.md   ({audit_root} = output/critiques for the drafter stage, output_edit/audits for the editor stage)
 source: collation:2703+ [Writing ruleset rule 13] + field guide 10
 

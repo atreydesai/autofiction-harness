@@ -1,7 +1,7 @@
 # Audit: Undue-Significance Audit (essay drift)
 
 id: undue_significance | owner: codex | tier: risk
-trigger: watch:wp-ailegacy + watch:legacy-puffery
+trigger: watch:wp-ailegacy-significance-puffery + flag:puffery (gate BANNED aiisms-2.35-legacy-puffery findings)
 output: {audit_root}/codex/chapter_{NN}.undue_significance.md   ({audit_root} = output/critiques for the drafter stage, output_edit/audits for the editor stage)
 source: wikipedia:WP:AILEGACY + collation 2.35
 
@@ -56,7 +56,7 @@ Then `REVISION ORDERS`:
 
 ## Procedure (owner=codex)
 1. Read {chapter_file} in full, marking every sentence where narration asserts importance, legacy, symbolism, or connection to something broader.
-2. Cross-check {watch_counts} for wp-ailegacy and legacy-puffery hits, and grep for the banned list and words-to-watch:
+2. Cross-check {watch_counts} for wp-ailegacy-significance-puffery hits and the gate report for BANNED aiisms-2.35-legacy-puffery findings, and grep for the banned list and words-to-watch:
    - testament, reminder, enduring, lasting, indelible, deeply rooted, pivotal, crucial, paramount, cannot be overstated;
    - marking, symbolizing, reflects, setting the stage, turning point, `would never` / `nothing would ever` shapes.
    - Adjudicate every hit in context.

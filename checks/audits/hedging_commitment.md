@@ -1,7 +1,7 @@
 # Audit: Hedging / Narratorial Commitment Audit
 
 id: hedging_commitment | owner: claude | tier: risk
-trigger: watch:hedging-cluster
+trigger: watch:catalog-hedging-cluster
 output: {audit_root}/claude/chapter_{NN}.hedging_commitment.md   ({audit_root} = output/critiques for the drafter stage, output_edit/audits for the editor stage)
 source: collation:81 [LLM outputs hedge tax]
 

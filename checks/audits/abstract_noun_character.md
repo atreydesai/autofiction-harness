@@ -1,7 +1,7 @@
 # Audit: Abstract-Noun Character-Description Audit
 
 id: abstract_noun_character | owner: codex | tier: risk
-trigger: watch:abstract-noun-character
+trigger: watch:fieldguide-abstract-noun-character
 output: {audit_root}/codex/chapter_{NN}.abstract_noun_character.md   ({audit_root} = output/critiques for the drafter stage, output_edit/audits for the editor stage)
 source: collation:3742-3749 [field guide 8]
 

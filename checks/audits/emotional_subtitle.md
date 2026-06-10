@@ -1,7 +1,7 @@
 # Audit: Emotional-Subtitle Audit (dialogue + redundant label)
 
 id: emotional_subtitle | owner: codex | tier: risk
-trigger: watch:emotional-subtitle
+trigger: watch:fieldguide-emotional-subtitle
 output: {audit_root}/codex/chapter_{NN}.emotional_subtitle.md   ({audit_root} = output/critiques for the drafter stage, output_edit/audits for the editor stage)
 source: collation:4142-4147 [field guide 18]
 

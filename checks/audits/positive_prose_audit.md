@@ -1,7 +1,7 @@
 # Audit: Positive Prose Audit (LLM-clean generic prose)
 
 id: positive_prose_audit | owner: claude | tier: risk
-trigger: sample:every-3rd-chapter + watch:vocab-clusters
+trigger: sample:every-3rd-chapter + watch:llm-catalog-ai-words + watch:wp-aivocab-cluster
 output: {audit_root}/claude/chapter_{NN}.positive_prose.md   ({audit_root} = output/critiques for the drafter stage, output_edit/audits for the editor stage)
 source: verve-legacy Positive Prose Audit
 

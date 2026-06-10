@@ -1,7 +1,7 @@
 # Audit: Frictionless-Competence-Fantasy Audit
 
 id: frictionless_competence | owner: codex | tier: risk
-trigger: watch:competence-porn
+trigger: watch:aiisms-2.8-competence-porn-watch
 output: {audit_root}/codex/chapter_{NN}.frictionless_competence.md   ({audit_root} = output/critiques for the drafter stage, output_edit/audits for the editor stage)
 source: collation:3588+ [field guide 16]
 

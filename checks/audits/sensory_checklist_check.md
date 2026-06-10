@@ -1,7 +1,7 @@
 # Audit: Sensory-Checklist Audit (three-smells pattern)
 
 id: sensory_checklist_check | owner: codex | tier: risk
-trigger: watch:sensory-checklist
+trigger: watch:fieldguide-sensory-checklist
 output: {audit_root}/codex/chapter_{NN}.sensory_checklist.md   ({audit_root} = output/critiques for the drafter stage, output_edit/audits for the editor stage)
 source: collation:1226-1236 [field guide 2]
 

@@ -1,7 +1,7 @@
 # Audit: False-Profound Negation Audit
 
 id: false_profound_negation | owner: codex | tier: risk
-trigger: watch:negation-patterns
+trigger: watch:fieldguide-amplification-echo + flag:negation-dense (gate BANNED findings for banned-1.4/1.29/fg7/qs-not-x-but-y)
 output: {audit_root}/codex/chapter_{NN}.false_profound_negation.md   ({audit_root} = output/critiques for the drafter stage, output_edit/audits for the editor stage)
 source: collation:784-793 [field guide 7]
 
@@ -47,7 +47,9 @@ Then `REVISION ORDERS`:
 1. Read {chapter_file} in full once, without searching, and mark every sentence whose rhetorical engine is negate-then-land.
 2. Run mechanical sweeps to catch what the read missed, treating hits as leads to verify in context, not verdicts:
    - grep the chapter for `Not `, `not a `, ` wasn't `, ` isn't `, `It was not`, `No `, `Just a `, ` — `, and sentence-initial fragments beginning with "Not";
-   - cross-reference {watch_counts} for the negation-patterns watch totals.
+   - cross-reference {watch_counts} for fieldguide-amplification-echo totals and the gate
+     report for BANNED negation findings (banned-1.4-negation-formula, banned-1.29-negative-parallelism,
+     banned-fg7-false-profound-negation, banned-qs-not-x-but-y / banned-qs-not-only-but).
 3. For each candidate, classify as two-beat (criterion 1) or three-beat (criterion 2).
 4. Apply the platitude test (criterion 3): strip the staging and state what is actually asserted.
    - Record the stripped paraphrase — this is the evidence the verdict rests on.

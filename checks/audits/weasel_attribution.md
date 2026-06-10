@@ -1,7 +1,7 @@
 # Audit: Weasel-Attribution Audit
 
 id: weasel_attribution | owner: codex | tier: risk
-trigger: watch:wp-aiweasel
+trigger: watch:wp-aiweasel-vague-attribution
 output: {audit_root}/codex/chapter_{NN}.weasel_attribution.md   ({audit_root} = output/critiques for the drafter stage, output_edit/audits for the editor stage)
 source: wikipedia:WP:AIWEASEL
 
