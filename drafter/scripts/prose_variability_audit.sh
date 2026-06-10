@@ -2,7 +2,9 @@
 set -euo pipefail
 
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-OUTPUT_DIR="$PROJECT_ROOT/output"
+# OUTPUT_DIR is overridable so the editor stage can run this against
+# output_edit/ (tempo/regularity audits consume these metrics there too)
+OUTPUT_DIR="${OUTPUT_DIR:-$PROJECT_ROOT/output}"
 CHAPTER_DIR="$OUTPUT_DIR/chapters"
 REPORT_DIR="$OUTPUT_DIR/critiques/codex"
 REPORT_FILE="$REPORT_DIR/prose_variability_audit.md"
