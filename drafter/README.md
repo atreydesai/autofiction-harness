@@ -1,6 +1,6 @@
 # Autonomous novel generation template
 
-Premise-driven 96-hour autonomous novel-writing run. Codex (GPT-5.5, extra-high reasoning) is the author-editor, planner, continuity owner, and final integrator. Claude Fable 5 (xhigh effort) is an independent co-drafter and adversarial editor. Every committed chapter goes through cross-model adversarial synthesis.
+Premise-driven 96-hour autonomous novel-writing run. Codex (GPT-5.5, extra-high reasoning) is the author-editor, planner, continuity owner, and final integrator. Claude Fable 5 (high effort) is an independent co-drafter and adversarial editor. Every committed chapter goes through cross-model adversarial synthesis.
 
 ## Structure
 

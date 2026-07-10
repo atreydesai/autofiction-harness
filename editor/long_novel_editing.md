@@ -70,7 +70,7 @@ Use git inside `output_edit/` for rollback. Commit after each chapter revision, 
 ## Scripts
 
 Available under `scripts/`:
-- `claude_logged_call.sh` — wrapper for Claude Fable 5 xhigh-effort calls. Logs every call, captures stream output, extracts assistant text to a Markdown file when `--md-out` is supplied, and serializes Claude calls. Use this rather than calling `claude -p` directly.
+- `claude_logged_call.sh` — wrapper for Claude Fable 5 high-effort calls. Logs every call, captures stream output, extracts assistant text to a Markdown file when `--md-out` is supplied, and serializes Claude calls. Use this rather than calling `claude -p` directly.
 - `quality_gate.sh` — wrapper for the shared tiered mechanical gate (`../checks/quality_gate.py`) against `output_edit/chapters/`. BANNED hits and over-CAP counts block commit; WATCH counts feed the judgment audits and the tic tracker. Run on every revised chapter before commit; `--book-level` at Phase 5/6.
 - `inner_claude_smoke.sh` — Claude reachability smoke test used by the launcher.
 
@@ -212,7 +212,7 @@ See "Final assembly" below.
 
 ## Codex and Claude — role assignment
 
-Codex (you, running GPT-5.5 with extra-high reasoning) is the orchestrator. Claude Fable 5 (xhigh effort) is the prose writer.
+Codex (you, running GPT-5.5 with extra-high reasoning) is the orchestrator. Claude Fable 5 (high effort) is the prose writer.
 
 **Codex (orchestrator / editor-in-chief):** reads the binding standard; owns cold diagnosis (in parallel with Claude's), surgery decisions, calibration consolidation, per-chapter classification; builds chapter packets; runs every codex-owned audit inline (each still produces its own output file); audits Claude's revisions (tics + Gates + inviolables + register preservation); optionally produces parallel revisions for high-leverage chapters; synthesizes; integrates; performs final assembly.
 
@@ -224,7 +224,7 @@ The cross-model tic lists (Claude's 13 known prose defaults, Codex's arrangement
 
 **Claude command shape.** Use `scripts/claude_logged_call.sh`. Save prompts under `output_edit/model_prompts/claude/<kind>/<id>.md`. Stream outputs under `output_edit/audits/claude/` or `output_edit/drafts/claude/`. Direct `claude -p` invocation outside the wrapper is forbidden — provenance must be mechanical.
 
-**Claude call patience.** Fable 5 xhigh-effort calls regularly take 12-18 minutes wall clock with extended silent thinking phases that produce no streaming tokens. Chapter-revision calls can run 30-60 minutes for a substantial rewrite. Do not kill a call as "hung" unless the stream file's modification time has not advanced for at least 5 minutes AND total wall clock exceeds 25 minutes (general calls) or 60 minutes (chapter-revision calls). Both conditions must hold. Killing a call that would have completed is more expensive than waiting another 10-30 minutes.
+**Claude call patience.** Fable 5 high-effort calls regularly take 12-18 minutes wall clock with extended silent thinking phases that produce no streaming tokens. Chapter-revision calls can run 30-60 minutes for a substantial rewrite. Do not kill a call as "hung" unless the stream file's modification time has not advanced for at least 5 minutes AND total wall clock exceeds 25 minutes (general calls) or 60 minutes (chapter-revision calls). Both conditions must hold. Killing a call that would have completed is more expensive than waiting another 10-30 minutes.
 
 ## Chapter intervention classifications
 

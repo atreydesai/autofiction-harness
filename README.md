@@ -1,6 +1,6 @@
 # Autofiction Harness — Drafter + Editor
 
-Two-stage autonomous novel pipeline. Both stages use Codex (GPT-5.5 extra-high) as the orchestrator and Claude Fable 5 (xhigh effort) as the independent prose writer / adversarial auditor, and both enforce a shared, source-traceable check system.
+Two-stage autonomous novel pipeline. Both stages use Codex (GPT-5.5 extra-high) as the orchestrator and Claude Fable 5 (high effort) as the independent prose writer / adversarial auditor, and both enforce a shared, source-traceable check system.
 
 ## Contents
 

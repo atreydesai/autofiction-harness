@@ -8,7 +8,7 @@ set -euo pipefail
 # does not count. Exits 0 only on a verified INNER_CLAUDE_OK final response.
 CLAUDE_BIN="${CLAUDE_BIN:-claude}"
 CLAUDE_MODEL="${CLAUDE_MODEL:-claude-fable-5}"
-CLAUDE_EFFORT="${CLAUDE_EFFORT:-xhigh}"
+CLAUDE_EFFORT="${CLAUDE_EFFORT:-high}"
 CLAUDE_DISALLOWED_TOOLS="${CLAUDE_DISALLOWED_TOOLS:-Agent,Task,TaskCreate,TaskGet,TaskList,TaskStop,TaskUpdate,TaskOutput,ToolSearch}"
 CLAUDE_TOOLS="${CLAUDE_TOOLS:-Read,Bash,Grep,Glob}"
 
