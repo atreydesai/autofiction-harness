@@ -12,6 +12,7 @@ HARNESS_ROOT="$(cd "$PROJECT_ROOT/.." && pwd)"
 exec python3 "$HARNESS_ROOT/checks/quality_gate.py" \
   --output-dir "$PROJECT_ROOT/output" \
   --patterns-dir "$HARNESS_ROOT/checks/patterns" \
+  --patterns-dir "$PROJECT_ROOT/premise/patterns" \
   --report "$PROJECT_ROOT/output/critiques/codex/mechanical/quality_gate_report.md" \
   --allowlist "$PROJECT_ROOT/output/quality_gate_allowlist.txt" \
   "$@"

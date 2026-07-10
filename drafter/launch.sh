@@ -3,9 +3,10 @@ set -euo pipefail
 
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TASK_PROMPT="$PROJECT_ROOT/long_novel_task.md"
-CODEX_BIN="${CODEX_BIN:-/Applications/Codex.app/Contents/Resources/codex}"
+CODEX_BIN="${CODEX_BIN:-$(command -v codex || echo /Applications/Codex.app/Contents/Resources/codex)}"
 CLAUDE_BIN="${CLAUDE_BIN:-claude}"
 CLAUDE_SMOKE_SCRIPT="$PROJECT_ROOT/scripts/inner_claude_smoke.sh"
+CHAPTER_SNAPSHOT_SCRIPT="$PROJECT_ROOT/scripts/chapter_snapshot.sh"
 CLAUDE_DISALLOWED_TOOLS="${CLAUDE_DISALLOWED_TOOLS:-Agent,Task,TaskCreate,TaskGet,TaskList,TaskStop,TaskUpdate,TaskOutput,ToolSearch}"
 CLAUDE_TOOLS="${CLAUDE_TOOLS:-Read,Bash,Grep,Glob}"
 OUTPUT_DIR="$PROJECT_ROOT/output"
@@ -25,7 +26,10 @@ CODEX_RECOVERABLE_LIMIT_SLEEP_SECONDS="${CODEX_RECOVERABLE_LIMIT_SLEEP_SECONDS:-
 CODEX_RECOVERABLE_LIMIT_MAX="${CODEX_RECOVERABLE_LIMIT_MAX:-20}"
 CODEX_VALIDATION_MAX_RETRIES="${CODEX_VALIDATION_MAX_RETRIES:-3}"
 STREAM_CODEX_OUTPUT="${STREAM_CODEX_OUTPUT:-0}"
+CHAPTER_SNAPSHOT_WATCHER="${CHAPTER_SNAPSHOT_WATCHER:-1}"
+CHAPTER_SNAPSHOT_INTERVAL_SECONDS="${CHAPTER_SNAPSHOT_INTERVAL_SECONDS:-5}"
 RUN_DEADLINE_SOURCE="unset"
+SNAPSHOT_WATCHER_PID=""
 
 EXIT_VALIDATION_FAILED=90
 EXIT_HARD_LIMIT=91
@@ -106,6 +110,20 @@ cleanup_lock() {
   rmdir "$LOCK_DIR" 2>/dev/null || true
 }
 
+stop_snapshot_watcher() {
+  if [ -n "${SNAPSHOT_WATCHER_PID:-}" ] && kill -0 "$SNAPSHOT_WATCHER_PID" 2>/dev/null; then
+    echo "[launcher] chapter_snapshot_watcher_stop pid=$SNAPSHOT_WATCHER_PID"
+    kill -TERM "$SNAPSHOT_WATCHER_PID" 2>/dev/null || true
+    wait "$SNAPSHOT_WATCHER_PID" 2>/dev/null || true
+  fi
+  rm -f "$LOCK_DIR/chapter_snapshot_watcher_pid" 2>/dev/null || true
+}
+
+cleanup_all() {
+  stop_snapshot_watcher
+  cleanup_lock
+}
+
 handle_signal() {
   local code="$1"
   local signal="$2"
@@ -117,7 +135,7 @@ handle_signal() {
 }
 
 acquire_lock
-trap cleanup_lock EXIT
+trap cleanup_all EXIT
 trap 'handle_signal 130 INT' INT
 trap 'handle_signal 143 TERM' TERM
 
@@ -131,7 +149,7 @@ exec > >(tee -a "$LOG_FILE") 2>&1
 
 echo "[launcher] project_root=$PROJECT_ROOT"
 echo "[launcher] log_file=$LOG_FILE"
-echo "[launcher] model=gpt-5.5 reasoning=xhigh deadline_utc=$RUN_DEADLINE_ISO deadline_source=$RUN_DEADLINE_SOURCE deadline_file=$DEADLINE_FILE run_duration=${RUN_DURATION_SECONDS}s max_restarts=$MAX_RESTARTS progress_stall_restarts=$PROGRESS_STALL_RESTARTS recoverable_limit_sleep=${CODEX_RECOVERABLE_LIMIT_SLEEP_SECONDS}s recoverable_limit_max=$CODEX_RECOVERABLE_LIMIT_MAX stream_codex_output=$STREAM_CODEX_OUTPUT caffeinate=${UNDER_CAFFEINATE:-0}"
+echo "[launcher] model=gpt-5.5 reasoning=xhigh deadline_utc=$RUN_DEADLINE_ISO deadline_source=$RUN_DEADLINE_SOURCE deadline_file=$DEADLINE_FILE run_duration=${RUN_DURATION_SECONDS}s max_restarts=$MAX_RESTARTS progress_stall_restarts=$PROGRESS_STALL_RESTARTS recoverable_limit_sleep=${CODEX_RECOVERABLE_LIMIT_SLEEP_SECONDS}s recoverable_limit_max=$CODEX_RECOVERABLE_LIMIT_MAX stream_codex_output=$STREAM_CODEX_OUTPUT chapter_snapshot_watcher=$CHAPTER_SNAPSHOT_WATCHER chapter_snapshot_interval=${CHAPTER_SNAPSHOT_INTERVAL_SECONDS}s caffeinate=${UNDER_CAFFEINATE:-0}"
 
 remaining_seconds() {
   local now
@@ -263,6 +281,7 @@ init_output_git() {
   grep -Fxq ".launcher.lock/" "$OUTPUT_DIR/.gitignore" || printf ".launcher.lock/\n" >> "$OUTPUT_DIR/.gitignore"
   grep -Fxq ".claude_guard/" "$OUTPUT_DIR/.gitignore" || printf ".claude_guard/\n" >> "$OUTPUT_DIR/.gitignore"
   grep -Fxq ".deadline_epoch" "$OUTPUT_DIR/.gitignore" || printf ".deadline_epoch\n" >> "$OUTPUT_DIR/.gitignore"
+  grep -Fxq "revision_snapshots/.state/" "$OUTPUT_DIR/.gitignore" || printf "revision_snapshots/.state/\n" >> "$OUTPUT_DIR/.gitignore"
 
   set +e
   git -C "$OUTPUT_DIR" add .gitignore
@@ -272,6 +291,28 @@ init_output_git() {
   if [ "$rc" -ne 0 ]; then
     echo "[launcher] git_initial_commit_skipped rc=$rc"
   fi
+}
+
+start_snapshot_watcher() {
+  if [ "$CHAPTER_SNAPSHOT_WATCHER" != "1" ]; then
+    echo "[launcher] chapter_snapshot_watcher disabled"
+    return 0
+  fi
+  if [ ! -x "$CHAPTER_SNAPSHOT_SCRIPT" ]; then
+    echo "[launcher] chapter_snapshot_watcher unavailable script=$CHAPTER_SNAPSHOT_SCRIPT"
+    return 0
+  fi
+  if ! [[ "$CHAPTER_SNAPSHOT_INTERVAL_SECONDS" =~ ^[0-9]+$ ]] || [ "$CHAPTER_SNAPSHOT_INTERVAL_SECONDS" -le 0 ]; then
+    echo "[launcher] invalid_CHAPTER_SNAPSHOT_INTERVAL_SECONDS value=$CHAPTER_SNAPSHOT_INTERVAL_SECONDS" >&2
+    exit 2
+  fi
+
+  local watcher_log
+  watcher_log="$LOG_DIR/chapter_snapshot_watcher.log"
+  echo "[launcher] chapter_snapshot_watcher_start script=$CHAPTER_SNAPSHOT_SCRIPT interval=${CHAPTER_SNAPSHOT_INTERVAL_SECONDS}s log=$watcher_log"
+  "$CHAPTER_SNAPSHOT_SCRIPT" --watch --interval "$CHAPTER_SNAPSHOT_INTERVAL_SECONDS" >> "$watcher_log" 2>&1 &
+  SNAPSHOT_WATCHER_PID=$!
+  printf "%s\n" "$SNAPSHOT_WATCHER_PID" > "$LOCK_DIR/chapter_snapshot_watcher_pid"
 }
 
 # Limit classification reads codex STDERR (where CLI/API errors surface),
@@ -474,6 +515,7 @@ validate_codex_claude_bridge() {
 
 validate_premise_input
 init_output_git
+start_snapshot_watcher
 validate_codex_config
 validate_claude_config
 validate_codex_claude_bridge

@@ -3,7 +3,7 @@ set -euo pipefail
 
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TASK_PROMPT="$PROJECT_ROOT/long_novel_editing.md"
-CODEX_BIN="${CODEX_BIN:-/Applications/Codex.app/Contents/Resources/codex}"
+CODEX_BIN="${CODEX_BIN:-$(command -v codex || echo /Applications/Codex.app/Contents/Resources/codex)}"
 CLAUDE_BIN="${CLAUDE_BIN:-claude}"
 CLAUDE_SMOKE_SCRIPT="$PROJECT_ROOT/scripts/inner_claude_smoke.sh"
 CLAUDE_DISALLOWED_TOOLS="${CLAUDE_DISALLOWED_TOOLS:-Agent,Task,TaskCreate,TaskGet,TaskList,TaskStop,TaskUpdate,TaskOutput,ToolSearch}"
