@@ -1,0 +1,227 @@
+================================================================================
+EIGHT TUESDAYS — CONSOLIDATED PREMISE PACKAGE
+================================================================================
+This file combines the source documents used to seed the premise:
+  1. premise.md                      — the premise / story bible
+  2. READING_GUIDE.md                — book-specific voice, form, and craft rules
+  3. patterns/reading_guide_bans.tsv — mechanically enforced ban(s)
+
+Content is reproduced verbatim from the source docs. Where the reading guide
+conflicts with generic defaults in long_novel_task.md, the reading guide wins.
+(README.md, which only describes the premise/ directory itself, is omitted.)
+
+
+################################################################################
+# DOCUMENT 1 — premise.md
+################################################################################
+
+# EIGHT TUESDAYS
+*(working title — the agent may propose alternates at final assembly, but the book must be titled)*
+
+Cozy, low-stakes contemporary romance / slice of life. New York City, autumn into first snow.
+
+---
+
+## Logline
+
+When a retiring painter mistakes two strangers in her gallery for a couple and offers them the last spot in her final couples-only art class, her secretly complicit nephew and a lapsed painter one lease away from leaving New York fake a relationship for eight Tuesdays — while the assignments designed to expose couples to each other do exactly that.
+
+## Genre contract & reader promise
+
+This is a **warm book**. Gentle yearning, found community, low dread, the pleasure of watching two careful people become brave. No villain, no cruelty, no humiliation played for pain. The reader should close it feeling that the city is kinder than it looks and that being seen is survivable. The final-page recontextualization (Odile knew all along) should reward rereading: small moments throughout must read one way on first pass and another once the reader knows.
+
+The stakes are deliberately human-scaled — a class, a lease, a friendship circle, two stalled vocations — and the book must treat those stakes as *enormous*, because to these two people they are.
+
+## Principal characters
+
+**June Park, 28.** Lapsed painter. BFA, a couple of group shows years ago, then a slow quiet quit: gallery sitting, art handling, freelance installation work — adjacent to art in every way except making it. Her lease ends in mid-December and she has half-decided that leaving New York is the honest thing to do; staying feels like loitering at a party she wasn't really invited to. Precise, dry, self-deprecating in a way that is half armor. Notices everything; says about a third of it. Odile Marchetti's painting *Winter Kitchen* is the reason she went to art school. She came to the gallery that night to say goodbye to it.
+
+**Theo Brennan, 30.** Odile's nephew (his mother is Odile's younger sister — the different surnames matter; see Canon). Runs the gallery's day-to-day and Odile's archive: shipping, framers, insurance, the slow work of managing a great painter's last act. Steady, warm, the dependable one in every room — and quietly aware that he has spent his twenties as the assistant to someone else's art. Drew constantly as a kid; hasn't made anything of his own in years. He is the kind of person who remembers how you take your coffee after one conversation, and assumes that this is unremarkable.
+
+**Odile Marchetti, 74.** The painter. Lower East Side fixture, formidable, funny, economical with praise and devastating with it when it lands. Retiring after one final teaching cycle: eight Tuesdays, couples only, because — she says — "you cannot paint honestly in front of a stranger." **She knows from the first night that June and Theo are not a couple. There was no mistake.** She saw a young woman saying goodbye to a painting and her nephew failing to be a person near her, and she did the one manipulative thing left in her power. This is the book's final reveal and must never be stated before the showcase — but it must be true throughout. On reread, Odile's choices (assignment design, pairings at class dinners, what she pretends not to notice) should all be consistent with a woman conducting two people toward each other.
+
+**The cohort.** Three other couples in the class — the found family. The agent designs them in architecture, but they must: span ages and kinds of love (suggest one long-married pair, one new-ish couple, one pair whose category is their own business), adopt June and Theo socially (dinners after class, a gallery walk, a weekend errand that becomes an outing), and function as the warm pressure that makes the lie grow a life worth keeping. They get real texture and small arcs of their own — this is the slice-of-life surface of the book — but they never steal the spine.
+
+## The engine (five elements)
+
+| Element | This book |
+|---|---|
+| Protagonists | June and Theo, dual POV |
+| Destabilizer | Odile "mistakes" them for a couple at her own opening and offers them the last spot in her final-ever class |
+| Objective | Get through eight Tuesdays without being found out — while each privately takes what they need from the class (June: permission to paint again, a reason to stay; Theo: a life that is his and not his aunt's) |
+| Opposition | Structural, not villainous: assignments that escalate in intimacy; a cohort that adopts them as "the young couple"; June's move-out deadline; Theo's hidden identity; two people's well-built self-protection |
+| Stakes | Losing the class, the cohort, and each other; June leaving the city; Theo settling permanently into a caretaker life; Odile's last class ending in embarrassment instead of grace |
+
+## Why now
+
+It is Odile's **final** class — there is no next cycle. June's lease ends the week after the showcase, and she has told herself that December is the deadline for an honest decision about New York. Theo is watching his aunt wind down her working life and beginning to understand, dimly, that he never started his.
+
+## The secret structure (binding)
+
+Two layers of deception, nested:
+
+1. **The public lie** — June and Theo pretend to be a couple, to Odile (they believe) and to the class.
+2. **The private lie** — June does not know Theo is Odile's nephew. In class he is just "Theo"; Odile never lets on (her own reasons; see reveal). June believes he is a stranger as roped-in as she was — that they are equally exposed. They are not: he has a safety net, and he knows whose class this is. This asymmetry is the late-book rupture.
+3. **The hidden truth under both** — Odile knew everything from night one. The "couples only" rule itself may be scrutinized on reread (did it exist before that night? the agent decides, but the answer must be consistent and quietly discoverable).
+
+## Story shape (setup, three turns, ending — binding)
+
+**Setup.** Odile's opening at the gallery on Orchard Street. June, there to say goodbye to *Winter Kitchen* before she gives up the city. Theo, working the room. Odile sweeps up, takes them for a couple, offers them the last spot in the final class — publicly, warmly, unrefusably. Theo cannot correct her in front of her own crowd; afterward, mortified, he asks June to play along. Eight weeks. June says yes — because it is *Odile*, and because the alternative is packing boxes.
+
+**Turn 1 (end of act one).** The assignments cross from technique into intimacy — *paint your partner from memory* — and they discover how much of each other they have already memorized. Meanwhile the cohort absorbs them: dinners after class, a gallery walk, borrowed scarves, standing orders at the diner. The lie grows a social life they both start to love. Now they are lying to friends.
+
+**Midpoint.** A cover kiss in front of classmates that neither of them performs. The same week: June gets a real offer out of town (studio share + steady work — the agent designs the specifics; it must be *good*, not a strawman), starting the week after the showcase. The fake relationship now has an expiry date that the real feelings don't. Odile announces the class ends with a **couples showcase**: one joint piece per pair.
+
+**Turn 3 (end of act two).** June finds out Theo is Odile's nephew. (How she finds out is the agent's to design — it should be small, accidental, and undeniable; not a snooped letter, not a villain's reveal.) What breaks her is not the lie itself but the asymmetry: he could have ended the charade on day one; she alone risked humiliation while he had a safety net; she fears she was material in his management of his aunt's feelings. She stops coming to class. Theo — who has spent his adult life as the assistant to someone else's art — has to do the one thing he has never done: make something happen that is his.
+
+**Ending (binding shape).** **No grand gesture, no public confession.** A bench in Tompkins Square Park, or a booth in the Ukrainian diner they've made theirs — lowkey, private, two people and bad coffee. Theo brings the painting he made of her — his first finished piece in years. They confess plainly, with no audience, and decide to finish the joint piece together. The **showcase is a coda, not a climax**: warm, snowy, the cohort, the work on the walls. There — or just after, in the emptying gallery — **Odile reveals she knew from the first night.** There was no mix-up. She saw two people who needed an excuse to be seen, and gave them eight Tuesdays. June stays in New York — for herself, with him; the order of those clauses matters and the book must earn it.
+
+## The class: assignment ladder (sequence binding; exact wording the agent's)
+
+The eight Tuesdays are the book's spine — one assignment per week, escalating from technique toward exposure. Suggested ladder (the agent may refine individual assignments but must preserve the escalation and weeks 3, 6, 7, 8):
+
+1. Gesture drawings — thirty seconds, don't look at the page. (Learning to be bad at something, publicly.)
+2. Blind contour portrait of your partner. (Permission to stare.)
+3. **Paint your partner from memory** — no reference, partner absent from the room. (Turn 1 material.)
+4. Your partner's hands, doing something they love.
+5. Paint a memory your partner tells you — their memory, your hands.
+6. **Paint what your partner is afraid of.** (The most dangerous Tuesday; handle with care, not melodrama.)
+7. **Joint piece begins** — one canvas, two painters, for the showcase.
+8. **Showcase.** (Coda; the confession has already happened.)
+
+## What changes irreversibly
+
+The truth comes out — to each other privately, to the class at the showcase, and finally Odile's truth to them. The paintings exist: real artifacts of real feeling, made under false pretenses and finished under true ones. June stays — having chosen the city rather than defaulted to it. Theo makes work of his own and begins extracting his life from his aunt's, with her blessing (this was her point all along). The cohort survives the reveal — the found family was never fake.
+
+## Setting & season (binding)
+
+Lower East Side / East Village, late September through mid-December. The gallery on Orchard Street; Odile's teaching studio above it; Tompkins Square Park; a Ukrainian diner on Second Avenue (fictionalized; Veselka-adjacent warmth). The season does quiet structural work: the class begins in shirtsleeve weather and ends at first snow. New York must be rendered with lived specificity — bodega cats, the F train's moods, radiator clank, the particular gold of 4:30 p.m. light in November — and never with postcard montage. The city is texture, not a character with a capital C; nobody calls it "the city that..." anything.
+
+## Canon (hard facts; do not contradict)
+
+- June Park, 28. BFA painting. Gallery sitter / art handler / freelance installer. Lease ends mid-December. Korean-American; her relationship to family expectation is texture, not the plot.
+- Theo Brennan, 30. Odile's nephew via his mother (Odile's younger sister). Different surnames are why the class never clocks the relation. Runs the gallery and archive. Stopped making his own work in his early twenties.
+- Odile Marchetti, 74. Painter of *Winter Kitchen* (the canvas that made June want to paint). Retiring. Knew everything from night one.
+- The class: eight consecutive Tuesdays, evenings, couples only, Odile's final teaching cycle. Three other couples plus June and Theo.
+- June does not know Theo is Odile's nephew until Turn 3. The class never knows until the showcase, if ever.
+- The confession is private (park bench or diner booth), before the showcase. The showcase is a coda. Odile's reveal comes at/just after the showcase.
+- Timeline: late September (opening night) → mid-December (showcase; first snow). June's out-of-town offer starts the week after the showcase.
+
+## Length target
+
+**~80,000 words** (acceptable band 75,000–88,000). This is a cozy contemporary romance, not an epic; do not pad toward a bigger number.
+
+
+################################################################################
+# DOCUMENT 2 — READING_GUIDE.md
+################################################################################
+
+# READING GUIDE — *Eight Tuesdays*
+
+Authoritative on book-specific interpretation. Where this guide conflicts with generic defaults in `long_novel_task.md`, this guide wins. Where it is silent, the task prompt and the shared check system govern.
+
+---
+
+## 1. Form binding
+
+- **POV / tense:** Close third person, past tense, **dual POV alternating by chapter** — June and Theo. Strict alternation may flex near Turn 3 (two consecutive June chapters during the rupture are permitted, once). June opens the book; June closes it.
+- **Chapter shape:** ~2,000–3,500 words. The eight Tuesdays are the spine; most weeks get one class chapter plus one or two off-Tuesday chapters (cohort life, work life, the slow business of falling). Architecture decides the exact map.
+- **Assignment cards (binding flourish):** Each of the eight class weeks opens with **Odile's handwritten assignment card** as a short epigraph — her wording, her voice, 10–40 words, occasionally with a crossed-out first draft of the instruction. These cards are load-bearing: on reread, they should read as a woman conducting two specific people toward each other.
+- **No prologue, no epilogue labeled as such.** The showcase coda is the final chapter. If the agent wants a beyond-the-ending beat, it must live inside that chapter (e.g., the last assignment card, repurposed).
+- **Length:** ~80K; band 75–88K. See premise.
+
+## 2. Register & voice
+
+- **Tone:** Warm, precise, lightly comic. Quiet interiority over quippiness. The comedy is observational and character-true — June's dryness, Theo's over-competent flailing, Odile's brutal economy — never sitcom rhythm, never banter for banter's sake.
+- **Comp calibration (rhythm/texture only — never content, names, images, or sentences):**
+  - Beth O'Leary — the warmth and the found-family social fabric;
+  - Emily Henry **at about 60% banter density** — dialogue has spark but characters are allowed to answer questions sincerely;
+  - *Days at the Morisaki Bookshop* / *Before the Coffee Gets Cold* — the quiet, the dignity of small routines, the unhurried scene that earns its smallness.
+- **Voice differentiation (dual POV must be audible blind):** June's chapters: shorter sentences, exact visual nouns (a painter's eye — she names pigments, edges, kinds of light), self-interruption, jokes aimed at herself. Theo's chapters: longer, steadier syntax; logistical tenderness (he thinks in errands done for people); a habit of cataloguing what people need; his noticing is domestic where hers is optical. A reader should identify the POV within a paragraph with the names removed.
+- **Odile on the page:** Economical. She gets the best lines and the fewest. Never whimsical-old-lady, never oracle. Her kindness arrives disguised as logistics or insult.
+- **Interiority discipline:** Feelings are rendered through action, object, and dialogue first; named directly only when the naming *is* the event (e.g., the confession). No paragraph-length emotional weather reports.
+- **Plain-speech floor (binding):** In every dialogue scene, each principal says at least one direct, unguarded sentence — a want, a fear, a fact, or a question stated plainly, not angled. Conversations may carry subtext but must be *followable as text*: after any exchange, a reader can say what each party asked, learned, or refused without decoding. Oblique or coded exchanges are a spice (at most ~2 per chapter), not the default register. Deflection must be visible *as* deflection, not dressed as wit. The strongest beats in this book are direct ones ("So if you quit, I lose the class." / "Yes."); protect that register.
+- **No dialogue diagnosis (binding, zero tolerance):** Characters never comment on, characterize, or rate one another's language, phrasing, rhythm, or delivery — no "that had the rhythm of a partial answer," no calling a sentence careful, rehearsed, lawyerly, or load-bearing. Not once per chapter; not at all. Perceptiveness is shown by what a character *does* with what they heard, never by captioning the conversation. (Odile included: her diagnoses target the person or the work, never the sentence.)
+
+## 3. Heat level
+
+**Closed door / sweet.** Kisses on the page, written with full attention. Anything beyond fades at the scene break. Desire is rendered through specificity of attention (what the POV character notices, hands, paint on skin) rather than anatomy. No coyness about the fade — cut clean, no winking at the reader.
+
+## 4. Motifs — owned set, with caps
+
+Motifs recur; they must not be hammered. The mechanical gate's generic caps apply; these are the book-specific ones:
+
+| Motif | Use | Cap |
+|---|---|---|
+| Hands (painting, carrying, fixing, almost-touching) | The book's primary tenderness channel | Foreground at most once per chapter; week-4 assignment is its sanctioned showcase |
+| Light (November gold, gallery track lights, studio fluorescents) | June's painter-eye; the season clock | One deliberate light-image per chapter max; never "golden hour" |
+| *Winter Kitchen* (Odile's painting) | June's origin and the book's thesis: domestic seen truly = love | Appears/invoked at most 5 times total; each appearance must add new meaning |
+| The unfinished / the underpainting | Theo's arc; things begun and abandoned | Metaphorical use max once per act; literal use free |
+| First snow | The clock made visible | Weather may be tracked throughout; snow itself falls once, at the end |
+| Coffee / the diner booth | The cohort's and then the couple's commons | Scene-setting free; do not let ordering coffee become a tic |
+
+Banned as motifs (too worn for this genre): rain at emotional peaks, shared umbrellas, paint "accidentally" on the face as flirtation more than once, the skyline as feelings.
+
+## 5. Care moves (the book's love language — use, vary, don't announce)
+
+Small acts are how this book says everything. Each named character owns distinct moves; never caption them ("it was these little things that..." is banned reflection).
+
+- **Theo:** remembers exact orders/preferences after one exposure; fixes things wordlessly (a wobbling easel, a jammed window); arrives with the thing you mentioned needing two weeks ago; absorbs logistics so others can be present.
+- **June:** names what's actually good in someone's work (precise, unsentimental praise — rare and therefore devastating); notices when someone's been left out of a conversation and re-threads them in; gives honest warnings dressed as jokes.
+- **Odile:** teaches the person, not the room — assignments quietly tailored; insults that are diagnoses; feeds people without comment.
+- **Cohort:** each couple gets at least one owned care move; design in architecture.
+
+## 6. Tic catalog — refuse on sight (extends the shared pattern registry)
+
+Genre-specific patterns this book must not contain, beyond the global BANNED/CAP tiers:
+
+- "a breath she didn't know she'd been holding" and all variants; breath-catching generally capped hard
+- stomach/chest "flips," "flutters," warmth "pooling," electricity at first touch
+- "something shifted between them," "the air changed," unspecified "tension"
+- smirking; chuckling; "a beat"; one-word reaction paragraphs ("Oh."— allowed at most once, at the confession, if earned)
+- the love interest "didn't know he was beautiful" framing in either direction
+- makeover logic, jealousy-via-third-party-date contrivance, eavesdropped half-conversation misunderstanding (the Turn-3 rupture is structural and earned; no cheap misunderstanding before it, and **no second rupture after the confession**)
+- NYC postcard montage; "the city that never sleeps"; subway meet-cute clichés; "only in New York"
+- art-world satire as cruelty (gentle comedy fine; contempt is off-register)
+- epiphany-via-mirror; characters watching themselves feel things
+- weather as on-the-nose emotional underline (see motif caps; the first-snow ending is the one sanctioned convergence)
+- dialogue diagnosis in any form (see the zero-tolerance rule in §2) — any instance is a defect, in any speaker's mouth or in narration about speech
+- **"load-bearing" / "loadbearing" / "load bearing" — banned outright**, all scopes, including literal structural use; mechanically enforced via `premise/patterns/reading_guide_bans.tsv`
+
+## 7. Architecture questions Phase 2 must settle (open by design)
+
+1. Exact chapter map across the eight weeks (class chapters vs. off-Tuesday chapters; where the POV alternation lands relative to the three turns).
+2. The cohort: the three couples — names, textures, owned care moves, one small arc each, and which of them (if any) clocks the truth early.
+3. The specifics of June's out-of-town offer — city, what makes it genuinely good, who offers it.
+4. The discovery mechanism for Turn 3 — small, accidental, undeniable; not snooping, not a third party's reveal-monologue.
+5. The joint piece: what June and Theo actually paint, such that it can carry the coda without a speech explaining it.
+6. Whether the "couples only" rule predates opening night — and how a rereader could tell.
+7. Bench vs. diner booth for the confession (or the walk between them).
+8. What, if anything, the class learns at the showcase about either secret.
+
+## 8. Book-specific quality gates (judgment, not regex)
+
+- **The blind-POV test:** strip names from any page of interiority; if the POV isn't identifiable, the voice differentiation has failed.
+- **The reread test:** every Odile scene must be consistent with her knowing; at least five moments planted that read innocently forward and pointedly backward — without any of them winking.
+- **The smallness test:** each chapter must contain at least one specific, non-portable detail of place, craft (painting rendered with technical truth — gesso, sight-size, fat over lean), or cohort life. If a scene could be set in any city or any class, it isn't finished.
+- **The warmth floor:** no scene's comedy lands at a character's expense in a way the book doesn't repair; embarrassment is survivable on the page within two scenes.
+- **The earned-stay test:** June's choice to remain in New York must be legible as *for herself first* — if the ending reads as staying-for-a-boyfriend, it has failed the book's thesis.
+- **The followability test:** take any dialogue exchange and ask a cold reader what each party wanted, learned, or refused. If the answer requires decoding subtext line by line, the scene has slipped into cleverness-as-register and fails the plain-speech floor (§2).
+
+## 9. Mid-run amendments (binding retrofit orders)
+
+- **2026-06-10:** The plain-speech floor, the zero-tolerance dialogue-diagnosis rule, and the "load-bearing" ban were added after chapters 01–03 were committed. Those chapters must be brought into compliance at the next revision touch (do not defer to final assembly). Known instances (both confirmed as open BANNED hits by the gate): chapter 01 line ~111 (narration) and chapter 02 line ~87 (June's "That's load-bearing language for an evening class") — replace both. Sweep all committed chapters for dialogue-diagnosis lines and subtext saturation while repairing.
+
+
+################################################################################
+# DOCUMENT 3 — patterns/reading_guide_bans.tsv
+################################################################################
+# Tab-separated. Columns:
+#   id  tier  scope  regex  threshold  unit  action  source_ref  notes
+
+id	tier	scope	regex	threshold	unit	action	source_ref	notes
+rg-eight-tuesdays-load-bearing	BANNED	both	\bload[ -]?bearing\b			Cut or replace; say what the thing actually does	reading_guide:tic-catalog	Book-specific ban (author order, 2026-06-10). Includes literal/structural uses; June's installer vocabulary must find other words.
+
+================================================================================
+END OF CONSOLIDATED PREMISE PACKAGE
+================================================================================

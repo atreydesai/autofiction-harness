@@ -1,0 +1,2 @@
+id	tier	scope	regex	threshold	unit	action	source_ref	notes
+rg-eight-tuesdays-load-bearing	BANNED	both	\bload[ -]?bearing\b			Cut or replace; say what the thing actually does	reading_guide:tic-catalog	Book-specific ban (author order, 2026-06-10). Includes literal/structural uses; June's installer vocabulary must find other words.
